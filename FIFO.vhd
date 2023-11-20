@@ -26,14 +26,17 @@ entity FIFO is
     DEPTH     : integer := 256);
   port (
     i_Rst_L : in std_logic;
-    i_Clk   : in std_logic;
+
     -- Write Side
+    i_wClk   : in std_logic;
     i_Wr_DV    : in  std_logic;
     i_Wr_Data  : in  std_logic_vector(WIDTH-1 downto 0);
     i_AF_Level : in  integer;
     o_AF_Flag  : out std_logic;
     o_Full     : out std_logic;
+
     -- Read Side
+    i_rClk   : in std_logic;
     i_Rd_En    : in  std_logic;
     o_Rd_DV    : out std_logic;
     o_Rd_Data  : out std_logic_vector(WIDTH-1 downto 0);
@@ -67,20 +70,20 @@ begin
       DEPTH => DEPTH)
     port map(
       -- Write Port
-      i_Wr_Clk  => i_Clk,
+      i_Wr_Clk  => i_wClk,
       i_Wr_Addr => s_Wr_Addr,
       i_Wr_DV   => i_Wr_DV,
       i_Wr_Data => i_Wr_Data,
 
       -- Read Port
-      i_Rd_Clk  => i_Clk,
+      i_Rd_Clk  => i_rClk,
       i_Rd_Addr => s_Rd_Addr,
       i_Rd_En   => i_Rd_En,
       o_Rd_DV   => s_Rd_DV,
       o_Rd_Data => s_Rd_Data);
 
   -- Main process to control address and counters for FIFO
-mosi:  process (i_Clk, i_Rst_L) is
+mosi:  process (i_wClk, i_Rst_L) is
   begin
     if (i_Rst_L = '0') then
       s_Wr_Addr <= 0;
@@ -109,45 +112,23 @@ mosi:  process (i_Clk, i_Rst_L) is
         end if;
       end if;
 
-      if i_Rd_En = '1' then
-        o_Rd_Data <= s_Rd_Data;
-      end if;
-
     end if;
   end process;
 
-miso: process (i_Clk, i_Rst_L) is
+miso: process (i_rClk, i_Rst_L) is
   begin
     if (i_Rst_L = '0') then
-      s_Wr_Addr <= 0;
       s_Rd_Addr <= 0;
       r_Count   <= 0;
     elsif rising_edge(i_Clk) then
       
         -- Read
-      if i_Rd_En then
+      if (i_Rd_En = '1')then
         if s_Rd_Addr = DEPTH-1 then
           s_Rd_Addr <= 0;
         else
           s_Rd_Addr <= s_Rd_Addr + 1;
         end if;
-      end if;
-
-      -- Keeps track of number of words in FIFO
-      -- Read with no write
-      if i_Rd_En = '1' and i_Wr_DV = '0' then
-        if (r_Count /= 0) then
-          r_Count <= r_Count - 1;
-        end if;
-      -- Write with no read
-      elsif i_Wr_DV = '1' and i_Rd_En = '0' then
-        if r_Count /= DEPTH then
-          r_Count <= r_Count + 1;
-        end if;
-      end if;
-
-      if i_Rd_En = '1' then
-        o_Rd_Data <= s_Rd_Data;
       end if;
 
     end if;
