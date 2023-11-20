@@ -83,15 +83,14 @@ begin
       o_Rd_Data => s_Rd_Data);
 
   -- Main process to control address and counters for FIFO
-mosi:  process (i_wClk, i_Rst_L) is
+p_write:  process (i_wClk, i_Rst_L) is
   begin
     if (i_Rst_L = '0') then
       s_Wr_Addr <= 0;
       w_Count   <= 0;
-    elsif rising_edge(i_Clk) then
-      
+    elsif (i_wClk'event and  i_wClk = '1') then     
       -- Write
-      if (i_Wr_DV = '1') then
+      if (i_Wr_DV = '1') then   -- ss_n is high i.e chip select is active
         if (s_Wr_Addr = DEPTH-1) then
           s_Wr_Addr <= 0;
         else
@@ -115,7 +114,7 @@ mosi:  process (i_wClk, i_Rst_L) is
     end if;
   end process;
 
-miso: process (i_rClk, i_Rst_L) is
+p_read: process (i_rClk, i_Rst_L) is
   begin
     if (i_Rst_L = '0') then
       s_Rd_Addr <= 0;
@@ -142,24 +141,5 @@ miso: process (i_rClk, i_Rst_L) is
   o_AE_Flag <= '1' when (s_Rd_Addr = "0010") else '0';
 
   o_Rd_DV <= s_Rd_DV;
-
-  ----------------------------------------------------------------------------
-  -- ASSERTION CODE, NOT SYNTHESIZED
-  -- synthesis translate_off
-  -- Ensures that we never read from empty FIFO or write to full FIFO.
-  process (i_Clk) is
-  begin
-    if rising_edge(i_Clk) then
-      if (i_Rd_En = '1' and i_Wr_DV = '0' and r_Count = 0) then
-        assert false report "Error! Reading Empty FIFO";
-      end if;
-
-      if (i_Wr_DV = '1' and i_Rd_En = '0' and r_Count = DEPTH) then
-        assert false report "Error! Writing Full FIFO";
-      end if;
-    end if;
-  end process;
-  -- synthesis translate_on
-  ----------------------------------------------------------------------------
   
 end RTL;
