@@ -55,6 +55,8 @@ signal count_clk2, count_spi_clk, count_to_gen_clk2 : integer := 1;
 signal s_Wr_DV, s_Rd_DV : std_logic := '0';
 signal start_clk2, clk2 : std_logic := '0';
 
+signal s_mosi, s_miso : std_logic_vector(0 downto 0);
+
 begin
 					
 MOSI_FIFO: entity work.FIFO 
@@ -81,27 +83,19 @@ MOSI_FIFO: entity work.FIFO
         o_Empty   =>  Empty_flag
     );
 
-MISO_FIFO: entity work.FIFO
-    generic map(
-        WIDTH => 1,
-        DEPTH => 8   
-    )
-    port map(
-
-    )
 
 process (spi_clk)
 begin
 
     -- At every rising edge of spi_clk send the MOSI data to FIFO if the chip select is high.
     if (ss_n = '1') then 
-        state => s_MOSI_to_FIFO;
+        state <= s_MOSI_to_FIFO;
     end if;
 
     -- After the sending of data has started, when the FIFO is filled till 10 bits assert the
     -- Almost Full flag with which we can start a adjusted signals.
     if (AF_Flag = '1') then
-        state => s_GEN_ADJ_SIGNALS;
+        state <= s_GEN_ADJ_SIGNALS;
     end if;
 
 end process;
@@ -151,5 +145,7 @@ begin
 end process;
 
 a_spi_clk <= clk2;
+s_mosi(0) <= mosi;
+s_mosi(0) <= miso;
 
 end Behavioral;
