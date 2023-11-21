@@ -68,7 +68,7 @@ MOSI_FIFO: entity work.FIFO
         i_Rst_L => rst,
         i_wClk   => spi_clk,
         i_Wr_DV    => s_Wr_DV,
-        i_Wr_Data  => mosi,
+        i_Wr_Data  => s_mosi,
         i_AF_Level => 10,
         o_AF_Flag  => AF_Flag,
         o_Full     => Full_flag,
@@ -77,7 +77,7 @@ MOSI_FIFO: entity work.FIFO
         i_rClk   => clk2,
         i_Rd_En    => s_Rd_DV,
         o_Rd_DV    => AE_Flag,
-        o_Rd_Data  => a_mosi,
+        o_Rd_Data  => s_mosi,
         i_AE_Level => 1,
         o_AE_Flag  => AE_Flag,
         o_Empty   =>  Empty_flag
@@ -106,7 +106,7 @@ begin
     -- the counter reaches a value of '16' set the state to IDLE
     count_clk2 <= count_clk2 + 1;
     if (count_clk2 = 17) then
-        state => s_IDLE;
+        state <= s_IDLE;
     end if;
 end process;
 
@@ -126,6 +126,7 @@ begin
                 state <= s_READ_from_FIFO;
             when s_READ_from_FIFO =>
                 s_Rd_DV <= AF_Flag;
+        end case;
     end if;
 end process;
 
@@ -141,6 +142,7 @@ begin
         else 
             clk2 <= '0';
         end if;
+    end if;
 
 end process;
 
