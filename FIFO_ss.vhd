@@ -19,8 +19,9 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 use ieee.math_real.all;
+use ieee.std_logic_unsigned.all;
 
-entity FIFO is 
+entity FIFO_ss is 
   generic (
     WIDTH     : integer := 8;
     DEPTH     : integer := 256);
@@ -43,7 +44,7 @@ entity FIFO is
     i_AE_Level : in  integer;
     o_AE_Flag  : out std_logic;
     o_Empty    : out std_logic);
-end entity FIFO;
+end entity FIFO_ss;
 
 architecture RTL of FIFO is 
   
@@ -86,15 +87,15 @@ begin
 p_write:  process (i_wClk, i_Rst_L) is
   begin
     if (i_Rst_L = '0') then
-      s_Wr_Addr <= 0;
-      w_Count   <= 0;
-    elsif (i_wClk'event and  i_wClk = '1') then     
+      s_Wr_Addr <= "0000";
+      r_Count   <= 0;
+    elsif rising_edge(i_wClk) then     
       -- Write
       if (i_Wr_DV = '1') then   -- ss_n is high i.e chip select is active
-        if (s_Wr_Addr = DEPTH-1) then
-          s_Wr_Addr <= 0;
+        if (s_Wr_Addr = std_logic_vector(to_unsigned(DEPTH-1, s_Wr_Addr'length))) then
+          s_Wr_Addr <= "0000";
         else
-          s_Wr_Addr <= s_Wr_Addr + 1;
+          s_Wr_Addr <= s_Wr_Addr + "1";
         end if;
       end if;
 
@@ -117,16 +118,16 @@ p_write:  process (i_wClk, i_Rst_L) is
 p_read: process (i_rClk, i_Rst_L) is
   begin
     if (i_Rst_L = '0') then
-      s_Rd_Addr <= 0;
-      r_Count   <= 0;
-    elsif rising_edge(i_Clk) then
+      s_Rd_Addr <= "0000";
+     -- r_Count   <= 0;
+    elsif rising_edge(i_rClk) then
       
         -- Read
       if (i_Rd_En = '1')then
-        if s_Rd_Addr = DEPTH-1 then
-          s_Rd_Addr <= 0;
+        if s_Rd_Addr = std_logic_vector(to_unsigned(DEPTH-1, s_Rd_Addr'length)) then
+          s_Rd_Addr <= "0000";
         else
-          s_Rd_Addr <= s_Rd_Addr + 1;
+          s_Rd_Addr <= s_Rd_Addr + "1";
         end if;
       end if;
 

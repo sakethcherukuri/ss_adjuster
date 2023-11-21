@@ -54,8 +54,44 @@ component SS_Adjuster
 end component;
 
 
-signal 
+signal s_rst : std_logic := '0';
+signal s_clk : std_logic := '0';
+signal s_ss_n : std_logic := '0';
+signal s_spi_clk : std_logic := '0';
+signal s_mosi : std_logic := '0';
+signal s_miso : std_logic := '0';
+signal s_a_ss_n : std_logic := '0';
+signal s_a_spi_clk : std_logic := '0';
+signal s_a_mosi : std_logic := '0';
+signal s_a_miso : std_logic := '0';
+
+constant spi_clk_period : time := 160 ns;
+constant clk_period : time := 10 ns;
+
+
 begin
+
+DUT: entity work.SS_Adjuster 
+    port map(
+        rst => s_rst,
+        clk => s_clk,
+        ss_n => s_ss_n,
+        spi_clk => s_spi_clk,
+        mosi => s_mosi,
+        miso => s_miso,
+        a_ss_n => s_a_ss_n,
+        a_spi_clk => s_a_spi_clk,
+        a_mosi => s_a_mosi,
+        a_miso => s_a_miso
+    );
+
+process
+begin
+    s_clk <= '0';
+    wait for clk_period/2;
+    s_clk <= '1';
+    wait for clk_period/2;
+end process;
 
 
 end Behavioral;

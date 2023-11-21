@@ -57,9 +57,35 @@ signal start_clk2, clk2 : std_logic := '0';
 
 signal s_mosi, s_miso : std_logic_vector(0 downto 0);
 
+component FIFO_ss
+    generic (
+        WIDTH    : integer := 8;
+        DEPTH     : integer := 256);
+      port (
+        i_Rst_L : in std_logic;
+    
+        -- Write Side
+        i_wClk   : in std_logic;
+        i_Wr_DV    : in  std_logic;
+        i_Wr_Data  : in  std_logic_vector(WIDTH-1 downto 0);
+        i_AF_Level : in  integer;
+        o_AF_Flag  : out std_logic;
+        o_Full     : out std_logic;
+    
+        -- Read Side
+        i_rClk   : in std_logic;
+        i_Rd_En    : in  std_logic;
+        o_Rd_DV    : out std_logic;
+        o_Rd_Data  : out std_logic_vector(WIDTH-1 downto 0);
+        i_AE_Level : in  integer;
+        o_AE_Flag  : out std_logic;
+        o_Empty    : out std_logic);
+end component;
+
+
 begin
 					
-MOSI_FIFO: entity work.FIFO 
+MOSI_FIFO: FIFO_ss 
     generic map(
         WIDTH => 1,
         DEPTH => 16
@@ -84,7 +110,7 @@ MOSI_FIFO: entity work.FIFO
     );
 
 
-process (spi_clk)
+process (spi_clk, clk2)
 begin
 
     -- At every rising edge of spi_clk send the MOSI data to FIFO if the chip select is high.
@@ -98,16 +124,13 @@ begin
         state <= s_GEN_ADJ_SIGNALS;
     end if;
 
-end process;
-
-process (clk2)
-begin
     -- At every rising edge of the faster clock i.e clk2, increment the counter value by '1' and when
     -- the counter reaches a value of '16' set the state to IDLE
     count_clk2 <= count_clk2 + 1;
     if (count_clk2 = 17) then
         state <= s_IDLE;
     end if;
+
 end process;
 
 process(clk)
@@ -123,9 +146,11 @@ begin
             when s_GEN_ADJ_SIGNALS =>
                 a_ss_n <= '1';
                 start_clk2 <= '1';
-                state <= s_READ_from_FIFO;
-            when s_READ_from_FIFO =>
                 s_Rd_DV <= AF_Flag;
+            when others =>
+                s_Wr_DV <= '1';
+                s_Rd_DV <= '0';
+                start_clk2 <= '0';
         end case;
     end if;
 end process;
