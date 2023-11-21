@@ -53,7 +53,7 @@ signal state : t_state := s_IDLE;
 signal AF_Flag, AE_Flag, Full_flag, Empty_flag, miso_flag : std_logic := '0';
 signal count_clk2, count_spi_clk, count_to_gen_clk2 : integer := 1;
 signal s_Wr_DV, s_Rd_DV : std_logic := '0';
-signal start_clk2 : std_logic := '0';
+signal start_clk2, clk2 : std_logic := '0';
 
 begin
 					
@@ -72,13 +72,13 @@ MOSI_FIFO: entity work.FIFO
         o_Full     => Full_flag,
 
         -- Read Side
-        i_rClk   => a_spi_clk,
+        i_rClk   => clk2,
         i_Rd_En    => s_Rd_DV,
         o_Rd_DV    => AE_Flag,
         o_Rd_Data  => a_mosi,
         i_AE_Level => 1,
         o_AE_Flag  => AE_Flag,
-        o_Empty   =>  Empty_flag);
+        o_Empty   =>  Empty_flag
     );
 
 MISO_FIFO: entity work.FIFO
@@ -106,7 +106,7 @@ begin
 
 end process;
 
-process (a_spi_clk)
+process (clk2)
 begin
     -- At every rising edge of the faster clock i.e clk2, increment the counter value by '1' and when
     -- the counter reaches a value of '16' set the state to IDLE
@@ -142,12 +142,14 @@ begin
         if (start_clk2 = '1') then
             count_to_gen_clk2 <= count_to_gen_clk2 + 1;
             if (count_to_gen_clk2 = 8) then
-                a_spi_clk <= not a_spi_clk;
+                clk2 <= not clk2;
             end if;
         else 
-            a_spi_clk <= '0';
+            clk2 <= '0';
         end if;
 
 end process;
+
+a_spi_clk <= clk2;
 
 end Behavioral;
