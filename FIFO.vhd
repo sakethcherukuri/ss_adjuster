@@ -137,7 +137,7 @@ p_read: process (i_rClk, i_Rst_L) is
   
   o_Empty <= '1' when (r_Count = 0) else '0';
 
-  o_AF_Flag <= '1' when (s_Wr_Addr = "1010") else '0';
+  o_AF_Flag <= '1' when (s_Wr_Addr >= "1010") else '0';
   o_AE_Flag <= '1' when (s_Rd_Addr = "0010") else '0';
 
   o_Rd_DV <= s_Rd_DV;

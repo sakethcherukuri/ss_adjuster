@@ -51,10 +51,9 @@ architecture Behavioral of SS_Adjuster is
 type t_state is (s_IDLE, s_MOSI_to_FIFO, s_GEN_ADJ_SIGNALS, s_READ_from_FIFO);
 signal state : t_state := s_IDLE;
 signal AF_Flag, AE_Flag, Full_flag, Empty_flag, miso_flag : std_logic := '0';
-signal count_clk2, count_spi_clk, count_to_gen_clk2 : integer := 0;
+signal count_clk2, count_spi_clk, count_to_gen_clk2 : integer := 1;
 signal s_Wr_DV, s_Rd_DV : std_logic := '0';
 signal start_clk2 : std_logic := '0';
-signal clk2 : std_logic := '0';
 
 begin
 					
@@ -105,10 +104,16 @@ begin
         state => s_GEN_ADJ_SIGNALS;
     end if;
 
-    if (count_clk2 = 16) then
+end process;
+
+process (a_spi_clk)
+begin
+    -- At every rising edge of the faster clock i.e clk2, increment the counter value by '1' and when
+    -- the counter reaches a value of '16' set the state to IDLE
+    count_clk2 <= count_clk2 + 1;
+    if (count_clk2 = 17) then
         state => s_IDLE;
     end if;
-
 end process;
 
 process(clk)
@@ -116,8 +121,9 @@ begin
     if rising_edge(clk) then
         case state is 
             when s_IDLE =>
-                s_Wr_DV <= '0';
+                s_Wr_DV <= '1';
                 s_Rd_DV <= '0';
+                start_clk2 <= '0';
             when s_MOSI_to_FIFO =>
                 s_Wr_DV <= ss_n;
             when s_GEN_ADJ_SIGNALS =>
@@ -136,8 +142,10 @@ begin
         if (start_clk2 = '1') then
             count_to_gen_clk2 <= count_to_gen_clk2 + 1;
             if (count_to_gen_clk2 = 8) then
-                clk2 <= not clk2;
+                a_spi_clk <= not a_spi_clk;
             end if;
+        else 
+            a_spi_clk <= '0';
         end if;
 
 end process;
