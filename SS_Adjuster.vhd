@@ -23,6 +23,7 @@ library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 Library UNISIM;
 use UNISIM.vcomponents.all;
+library xil_defaultlib;
 
 -- Uncomment the following library declaration if using
 -- arithmetic functions with Signed or Unsigned values
@@ -57,38 +58,15 @@ signal start_clk2, clk2 : std_logic := '0';
 
 signal s_mosi, s_miso : std_logic_vector(0 downto 0);
 
-component FIFO_ss
-    generic (
-        WIDTH    : integer := 8;
-        DEPTH     : integer := 256);
-      port (
-        i_Rst_L : in std_logic;
-    
-        -- Write Side
-        i_wClk   : in std_logic;
-        i_Wr_DV    : in  std_logic;
-        i_Wr_Data  : in  std_logic_vector(WIDTH-1 downto 0);
-        i_AF_Level : in  integer;
-        o_AF_Flag  : out std_logic;
-        o_Full     : out std_logic;
-    
-        -- Read Side
-        i_rClk   : in std_logic;
-        i_Rd_En    : in  std_logic;
-        o_Rd_DV    : out std_logic;
-        o_Rd_Data  : out std_logic_vector(WIDTH-1 downto 0);
-        i_AE_Level : in  integer;
-        o_AE_Flag  : out std_logic;
-        o_Empty    : out std_logic);
-end component;
-
+constant g_WIDTH : integer := 1;
+constant g_DEPTH : integer := 16;
 
 begin
 					
-MOSI_FIFO: FIFO_ss 
+MOSI_FIFO: entity xil_defaultlib.FIFO_ss 
     generic map(
-        WIDTH => 1,
-        DEPTH => 16
+        WIDTH => g_WIDTH,
+        DEPTH => g_DEPTH
     )
     port map(
         i_Rst_L => rst,

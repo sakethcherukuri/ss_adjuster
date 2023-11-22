@@ -46,7 +46,7 @@ entity FIFO_ss is
     o_Empty    : out std_logic);
 end entity FIFO_ss;
 
-architecture RTL of FIFO is 
+architecture RTL of FIFO_ss is 
   
   -- Number of bits required to store DEPTH words
   constant DEPTH_BITS : integer := 4;
