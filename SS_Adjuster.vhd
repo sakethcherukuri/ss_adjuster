@@ -21,6 +21,7 @@
 
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.numeric_std.all;
 Library UNISIM;
 use UNISIM.vcomponents.all;
 library xil_defaultlib;
@@ -53,10 +54,12 @@ type t_state is (s_IDLE, s_MOSI_to_FIFO, s_GEN_ADJ_SIGNALS, s_READ_from_FIFO);
 signal state : t_state := s_IDLE;
 signal AF_Flag, AE_Flag, Full_flag, Empty_flag, miso_flag : std_logic := '0';
 signal count_clk2, count_spi_clk, count_to_gen_clk2 : integer := 1;
-signal s_Wr_DV, s_Rd_DV : std_logic := '0';
-signal start_clk2, clk2 : std_logic := '0';
 
-signal s_mosi, s_miso : std_logic_vector(0 downto 0);
+-- Signals for setting the Data valid lines on the FIFO
+signal s_Wr_DV, s_Rd_DV : std_logic := '0';
+signal start_clk2, stop_clk2, clk2 : std_logic := '0';
+
+signal s_mosi, s_miso, s_a_mosi, s_a_miso : std_logic_vector(0 downto 0);
 
 constant g_WIDTH : integer := 1;
 constant g_DEPTH : integer := 16;
@@ -81,7 +84,7 @@ MOSI_FIFO: entity xil_defaultlib.FIFO_ss
         i_rClk   => clk2,
         i_Rd_En    => s_Rd_DV,
         o_Rd_DV    => AE_Flag,
-        o_Rd_Data  => s_mosi,
+        o_Rd_Data  => s_a_mosi,
         i_AE_Level => 1,
         o_AE_Flag  => AE_Flag,
         o_Empty   =>  Empty_flag
@@ -102,10 +105,7 @@ begin
         state <= s_GEN_ADJ_SIGNALS;
     end if;
 
-    -- At every rising edge of the faster clock i.e clk2, increment the counter value by '1' and when
-    -- the counter reaches a value of '16' set the state to IDLE
-    count_clk2 <= count_clk2 + 1;
-    if (count_clk2 = 17) then
+    if (stop_clk2 = '1') then
         state <= s_IDLE;
     end if;
 
@@ -116,7 +116,7 @@ begin
     if rising_edge(clk) then
         case state is 
             when s_IDLE =>
-                s_Wr_DV <= '1';
+                s_Wr_DV <= '0';
                 s_Rd_DV <= '0';
                 start_clk2 <= '0';
             when s_MOSI_to_FIFO =>
@@ -126,7 +126,7 @@ begin
                 start_clk2 <= '1';
                 s_Rd_DV <= AF_Flag;
             when others =>
-                s_Wr_DV <= '1';
+                s_Wr_DV <= '0';
                 s_Rd_DV <= '0';
                 start_clk2 <= '0';
         end case;
@@ -139,8 +139,9 @@ begin
     if rising_edge(clk)then
         if (start_clk2 = '1') then
             count_to_gen_clk2 <= count_to_gen_clk2 + 1;
-            if (count_to_gen_clk2 = 8) then
+            if (count_to_gen_clk2 = 4) then
                 clk2 <= not clk2;
+                count_to_gen_clk2 <= 0;
             end if;
         else 
             clk2 <= '0';
@@ -149,8 +150,22 @@ begin
 
 end process;
 
+process(clk2)
+begin
+    -- At every rising edge of the faster clock i.e clk2, increment the counter value by '1' and when
+    -- the counter reaches a value of '34' set the state to IDLE
+    
+    if (count_clk2 = 34) then
+        stop_clk2 <= '1';
+    else
+        stop_clk2 <= '0';
+    end if;
+    count_clk2 <= count_clk2 + 1;
+end process;
+
 a_spi_clk <= clk2;
 s_mosi(0) <= mosi;
 s_mosi(0) <= miso;
+a_mosi <= s_a_mosi(0);
 
 end Behavioral;

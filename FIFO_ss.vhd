@@ -53,6 +53,7 @@ architecture RTL of FIFO_ss is
 
   --signal r_Wr_Addr, r_Rd_Addr : natural range 0 to DEPTH-1;
   signal r_Count : natural range 0 to DEPTH;  -- 1 extra to go to DEPTH
+  signal wr_count, rd_count : integer := 0;
  
   signal s_Rd_DV : std_logic;
   signal s_Rd_Data : std_logic_vector(WIDTH-1 downto 0);
@@ -87,32 +88,33 @@ begin
 p_write:  process (i_wClk, i_Rst_L) is
   begin
     if (i_Rst_L = '0') then
-      s_Wr_Addr <= "0000";
-      r_Count   <= 0;
+        s_Wr_Addr <= "0000";
+        r_Count   <= 0;
     elsif rising_edge(i_wClk) then     
-      -- Write
-      if (i_Wr_DV = '1') then   -- ss_n is high i.e chip select is active
-        if (s_Wr_Addr = std_logic_vector(to_unsigned(DEPTH-1, s_Wr_Addr'length))) then
-          s_Wr_Addr <= "0000";
-        else
-          s_Wr_Addr <= s_Wr_Addr + "1";
-        end if;
-      end if;
+            -- Write
+            if (i_Wr_DV = '1') then   -- ss_n is high i.e chip select is active
+                if (wr_count = 15) then
+                wr_count <= 0;
+                else
+                    wr_count <= wr_count + 1;
+                end if;
+            end if;
 
-      -- Keeps track of number of words in FIFO
-      -- Read with no write
-      if i_Rd_En = '1' and i_Wr_DV = '0' then
-        if (r_Count /= 0) then
-          r_Count <= r_Count - 1;
+        -- Keeps track of number of words in FIFO
+        -- Read with no write
+        if i_Rd_En = '1' and i_Wr_DV = '0' then
+            if (r_Count /= 0) then
+            -- r_Count <= r_Count - 1;
+            end if;
+        -- Write with no read
+        elsif i_Wr_DV = '1' and i_Rd_En = '0' then
+            if r_Count /= DEPTH then
+            -- r_Count <= r_Count + 1;
+            end if;
         end if;
-      -- Write with no read
-      elsif i_Wr_DV = '1' and i_Rd_En = '0' then
-        if r_Count /= DEPTH then
-          r_Count <= r_Count + 1;
-        end if;
-      end if;
 
     end if;
+    s_Wr_Addr <= std_logic_vector(to_unsigned(wr_count, s_Wr_Addr'length));
   end process;
 
 p_read: process (i_rClk, i_Rst_L) is
@@ -124,7 +126,7 @@ p_read: process (i_rClk, i_Rst_L) is
       
         -- Read
       if (i_Rd_En = '1')then
-        if s_Rd_Addr = std_logic_vector(to_unsigned(DEPTH-1, s_Rd_Addr'length)) then
+        if s_Rd_Addr = "1111" then
           s_Rd_Addr <= "0000";
         else
           s_Rd_Addr <= s_Rd_Addr + "1";
@@ -138,7 +140,7 @@ p_read: process (i_rClk, i_Rst_L) is
   
   o_Empty <= '1' when (r_Count = 0) else '0';
 
-  o_AF_Flag <= '1' when (s_Wr_Addr >= "1010") else '0';
+  o_AF_Flag <= '1' when (s_Wr_Addr >= std_logic_vector(to_unsigned(i_AF_Level, s_Wr_Addr'length))) else '0';
   o_AE_Flag <= '1' when (s_Rd_Addr = "0010") else '0';
 
   o_Rd_DV <= s_Rd_DV;

@@ -21,6 +21,7 @@
 
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.numeric_std.all;
 
 -- Uncomment the following library declaration if using
 -- arithmetic functions with Signed or Unsigned values
@@ -95,9 +96,9 @@ end process;
 
 process
 begin
-    s_rst <= '1';
-    wait for 35 ns;
     s_rst <= '0';
+    wait for 35 ns;
+    s_rst <= '1';
     wait for 45 ns;
     
     -- set the ss_n to high
@@ -199,7 +200,9 @@ begin
     s_spi_clk <= '1';
     wait for 80 ns;
     s_spi_clk <= '0';
-    wait for 80 ns;
+    wait for 200 ns;
+
+    s_ss_n <= '0';
     
     
     wait;
