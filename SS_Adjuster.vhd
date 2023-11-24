@@ -70,13 +70,15 @@ type t_state_miso is (s_IDLE_miso, s_READ_from_FIFO_miso);
 signal state_miso : t_state_miso := s_IDLE_miso;
 -- Miso flags
 signal AF_Flag_miso, miso_start_flag : std_logic := '0';
-
+-- Signals for setting the Data valid lines on the FIFO
+signal s_Wr_DV_miso, s_Rd_DV_miso : std_logic := '0';
 ------------------------- MISO ----------------------------
 
 -- Signals that count
 signal count_clk2, count_spi_clk, count_to_gen_clk2 : integer := 0;
 
-
+-- Write or Read control bit
+signal cmd_write : std_logic := '0';
 
 signal start_clk2, stop_clk2, clk2 : std_logic := '0';
 
@@ -129,13 +131,13 @@ MISO_FIFO: entity xil_defaultlib.FIFO_ss
         i_rClk   => clk2,
         i_Rd_En    => s_Rd_DV_miso,
         o_Rd_DV    => AE_Flag,
-        o_Rd_Data  => s_a_mosi,
+        o_Rd_Data  => s_a_miso,
         i_AE_Level => 1,
         o_AE_Flag  => AE_Flag,
         o_Empty   =>  Empty_flag
     );
 
-mosi: process (clk)
+p_mosi: process (clk)
 begin
     if rising_edge(clk) then
         if rst = '0' then
@@ -190,27 +192,34 @@ begin
     end if;
 end process;
 
-mosi: process (clk)
+p_miso: process (clk)
 begin
     if rising_edge(clk) then
         if rst = '0' then
             s_Wr_DV_miso <= '0';
             s_Rd_DV_miso <= '0';
         else
-            case state is
+            case state_miso is
                 when s_IDLE_miso => 
-                    if AF_Flag_miso = '1' then
+                    if (AF_Flag_miso = '1' and count_clk2 = 7) then
                         state_miso <= s_READ_from_FIFO_miso;
-                        s_Rd_DV_miso <= AF_Flag;
+                        s_Rd_DV_miso <= AF_Flag_miso;
                     else
                         state_miso <= s_IDLE_miso;
                     end if;
                 
                     when s_READ_from_FIFO_miso =>
-                        if 
-            
+                        if count_spi_clk = 16 then
+                            state_miso <= s_IDLE_miso;
+                            s_Wr_DV_miso <= '0';
+                            s_Rd_DV_miso <= '0';
+                        else 
+                            state_miso <= s_READ_from_FIFO_miso;
+                        end if;
                 when others =>
-                    
+                        state_miso <= s_IDLE_miso;
+                        s_Wr_DV_miso <= '0';
+                        s_Rd_DV_miso <= '0';
             
             end case;
         end if;
@@ -302,6 +311,7 @@ end process;
 a_spi_clk <= clk2;
 s_mosi(0) <= mosi;
 s_miso(0) <= miso;
+a_miso <= s_a_miso(0);
 a_mosi <= s_a_mosi(0);
 a_ss_n <= start_clk2;
 miso_start_flag <= '1' when count_spi_clk >= 7 else '0';
