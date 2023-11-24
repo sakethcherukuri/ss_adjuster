@@ -50,17 +50,34 @@ end SS_Adjuster;
 
 architecture Behavioral of SS_Adjuster is
 
-type t_state is (s_IDLE, s_MOSI_to_FIFO, s_GEN_ADJ_SIGNALS, s_READ_from_FIFO, s_ONE_LAST_CYCLE);
-signal state, next_state : t_state := s_IDLE;
 
--- Signals for flags and we are currently only interested in AF_Flag.
-signal AF_Flag, AE_Flag, Full_flag, Empty_flag, miso_flag : std_logic := '0';
+------------------------- MOSI ----------------------------
+
+type t_state_mosi is (s_IDLE, s_GEN_ADJ_SIGNALS, s_ONE_LAST_CYCLE);
+signal state, next_state : t_state_mosi := s_IDLE;
+
+-- flags and we are currently only interested in AF_Flag.
+signal AF_Flag, AE_Flag, Full_flag, Empty_flag : std_logic := '0';
+-- Signals for setting the Data valid lines on the FIFO
+signal s_Wr_DV_mosi, s_Rd_DV_mosi : std_logic := '0';
+
+------------------------- MOSI ----------------------------
+
+
+------------------------- MISO ----------------------------
+
+type t_state_miso is (s_IDLE_miso, s_READ_from_FIFO_miso);
+signal state_miso : t_state_miso := s_IDLE_miso;
+-- Miso flags
+signal AF_Flag_miso, miso_start_flag : std_logic := '0';
+
+------------------------- MISO ----------------------------
 
 -- Signals that count
 signal count_clk2, count_spi_clk, count_to_gen_clk2 : integer := 0;
 
--- Signals for setting the Data valid lines on the FIFO
-signal s_Wr_DV, s_Rd_DV : std_logic := '0';
+
+
 signal start_clk2, stop_clk2, clk2 : std_logic := '0';
 
 signal s_mosi, s_miso, s_a_mosi, s_a_miso : std_logic_vector(0 downto 0);
@@ -86,7 +103,7 @@ MOSI_FIFO: entity xil_defaultlib.FIFO_ss
 
         -- Read Side
         i_rClk   => clk2,
-        i_Rd_En    => s_Rd_DV,
+        i_Rd_En    => s_Rd_DV_mosi,
         o_Rd_DV    => AE_Flag,
         o_Rd_Data  => s_a_mosi,
         i_AE_Level => 1,
@@ -94,13 +111,36 @@ MOSI_FIFO: entity xil_defaultlib.FIFO_ss
         o_Empty   =>  Empty_flag
     );
 
+MISO_FIFO: entity xil_defaultlib.FIFO_ss
+    generic map (
+        WIDTH => g_WIDTH,
+        DEPTH => 8
+    )
+    port map (
+        i_Rst_L => rst,
+        i_wClk   => spi_clk,
+        i_Wr_DV    => miso_start_flag,
+        i_Wr_Data  => s_miso,
+        i_AF_Level => 5,
+        o_AF_Flag  => AF_Flag_miso,
+        o_Full     => Full_flag,
 
-process (clk)
+        -- Read Side
+        i_rClk   => clk2,
+        i_Rd_En    => s_Rd_DV_miso,
+        o_Rd_DV    => AE_Flag,
+        o_Rd_Data  => s_a_mosi,
+        i_AE_Level => 1,
+        o_AE_Flag  => AE_Flag,
+        o_Empty   =>  Empty_flag
+    );
+
+mosi: process (clk)
 begin
     if rising_edge(clk) then
         if rst = '0' then
-            s_Wr_DV <= '0';
-            s_Rd_DV <= '0';
+            s_Wr_DV_mosi <= '0';
+            s_Rd_DV_mosi <= '0';
             start_clk2 <= '0';
         else
             -- State Transition logic
@@ -112,7 +152,7 @@ begin
                         --next_state <= s_GEN_ADJ_SIGNALS;
                         state <= s_GEN_ADJ_SIGNALS;
                         start_clk2 <= '1';
-                        s_Rd_DV <= AF_Flag;
+                        s_Rd_DV_mosi <= AF_Flag;
                     
                     else 
                         --next_state <= s_IDLE;
@@ -123,7 +163,7 @@ begin
                     if (count_clk2 = 16) then
                         --next_state <= s_ONE_LAST_CYCLE;
                         state <= s_ONE_LAST_CYCLE;
-                        s_Rd_DV <= '0';
+                        s_Rd_DV_mosi <= '0';
                     else
                         --next_state <= s_GEN_ADJ_SIGNALS;
                         state <= s_GEN_ADJ_SIGNALS;
@@ -133,8 +173,8 @@ begin
                         --next_state <= s_IDLE;
                         state <= s_IDLE;
                         start_clk2 <= '0';
-                        s_Wr_DV <= '0';
-                        s_Rd_DV <= '0';
+                        s_Wr_DV_mosi <= '0';
+                        s_Rd_DV_mosi <= '0';
                     else
                         --next_state <= s_ONE_LAST_CYCLE;
                         state <= s_ONE_LAST_CYCLE;
@@ -143,8 +183,35 @@ begin
                     --next_state <= s_IDLE;
                     state <= s_IDLE;
                     start_clk2 <= '0';
-                    s_Wr_DV <= '0';
-                    s_Rd_DV <= '0';
+                    s_Wr_DV_mosi <= '0';
+                    s_Rd_DV_mosi <= '0';
+            end case;
+        end if;
+    end if;
+end process;
+
+mosi: process (clk)
+begin
+    if rising_edge(clk) then
+        if rst = '0' then
+            s_Wr_DV_miso <= '0';
+            s_Rd_DV_miso <= '0';
+        else
+            case state is
+                when s_IDLE_miso => 
+                    if AF_Flag_miso = '1' then
+                        state_miso <= s_READ_from_FIFO_miso;
+                        s_Rd_DV_miso <= AF_Flag;
+                    else
+                        state_miso <= s_IDLE_miso;
+                    end if;
+                
+                    when s_READ_from_FIFO_miso =>
+                        if 
+            
+                when others =>
+                    
+            
             end case;
         end if;
     end if;
@@ -220,10 +287,23 @@ begin
     end if;
 end process;
 
+
+process (spi_clk)
+begin
+    if rising_edge(spi_clk) then
+        if count_spi_clk <= 16 then
+            count_spi_clk <= count_spi_clk + 1;
+        else
+            count_spi_clk <= 0;
+        end if;
+    end if;
+end process;
+
 a_spi_clk <= clk2;
 s_mosi(0) <= mosi;
 s_miso(0) <= miso;
 a_mosi <= s_a_mosi(0);
 a_ss_n <= start_clk2;
+miso_start_flag <= '1' when count_spi_clk >= 7 else '0';
 
 end Behavioral;

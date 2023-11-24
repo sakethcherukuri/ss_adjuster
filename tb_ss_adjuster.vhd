@@ -21,7 +21,6 @@
 
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
-use IEEE.numeric_std.all;
 
 -- Uncomment the following library declaration if using
 -- arithmetic functions with Signed or Unsigned values
@@ -200,9 +199,7 @@ begin
     s_spi_clk <= '1';
     wait for 80 ns;
     s_spi_clk <= '0';
-    wait for 200 ns;
-
-    s_ss_n <= '0';
+    wait for 80 ns;
     
     
     wait;
@@ -245,6 +242,39 @@ begin
     -- A0 bit
     s_mosi <= '0';
     wait for 160 ns;
+    
+    --D7 bit
+    s_miso <= '1';
+    wait for 160 ns;
+        
+    --D6 bit
+    s_miso <= '0';
+    wait for 160 ns;
+    
+    --D5 bit
+    s_miso <= '0';
+    wait for 160 ns;
+    
+    --D4 bit
+    s_miso <= '0';
+    wait for 160 ns;
+    
+    --D3 bit
+    s_miso <= '1';
+    wait for 160 ns;
+    
+    --D2 bit
+    s_miso <= '0';
+    wait for 160 ns;
+    
+    --D1 bit
+    s_miso <= '0';
+    wait for 160 ns;
+    
+    --D0 bit
+    s_miso <= '1';
+    wait for 160 ns;
+    
     
     wait;
 end process;
