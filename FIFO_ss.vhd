@@ -126,13 +126,13 @@ p_read: process (i_rClk, i_Rst_L) is
       
         -- Read
       if (i_Rd_En = '1')then
-        if s_Rd_Addr = "1111" then
-          s_Rd_Addr <= "0000";
+        if rd_count = 15 then
+            rd_count <= 0;
         else
-          s_Rd_Addr <= s_Rd_Addr + "1";
+            rd_count <= rd_count + 1;
         end if;
       end if;
-
+      s_Rd_Addr <= std_logic_vector(to_unsigned(rd_count, s_Rd_Addr'length));
     end if;
   end process;
 
@@ -144,5 +144,6 @@ p_read: process (i_rClk, i_Rst_L) is
   o_AE_Flag <= '1' when (s_Rd_Addr = "0010") else '0';
 
   o_Rd_DV <= s_Rd_DV;
+  o_Rd_Data <= s_Rd_Data;
   
 end RTL;

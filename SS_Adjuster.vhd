@@ -50,10 +50,14 @@ end SS_Adjuster;
 
 architecture Behavioral of SS_Adjuster is
 
-type t_state is (s_IDLE, s_MOSI_to_FIFO, s_GEN_ADJ_SIGNALS, s_READ_from_FIFO);
-signal state : t_state := s_IDLE;
+type t_state is (s_IDLE, s_MOSI_to_FIFO, s_GEN_ADJ_SIGNALS, s_READ_from_FIFO, s_ONE_LAST_CYCLE);
+signal state, next_state : t_state := s_IDLE;
+
+-- Signals for flags and we are currently only interested in AF_Flag.
 signal AF_Flag, AE_Flag, Full_flag, Empty_flag, miso_flag : std_logic := '0';
-signal count_clk2, count_spi_clk, count_to_gen_clk2 : integer := 1;
+
+-- Signals that count
+signal count_clk2, count_spi_clk, count_to_gen_clk2 : integer := 0;
 
 -- Signals for setting the Data valid lines on the FIFO
 signal s_Wr_DV, s_Rd_DV : std_logic := '0';
@@ -74,7 +78,7 @@ MOSI_FIFO: entity xil_defaultlib.FIFO_ss
     port map(
         i_Rst_L => rst,
         i_wClk   => spi_clk,
-        i_Wr_DV    => s_Wr_DV,
+        i_Wr_DV    => ss_n,
         i_Wr_Data  => s_mosi,
         i_AF_Level => 10,
         o_AF_Flag  => AF_Flag,
@@ -91,47 +95,101 @@ MOSI_FIFO: entity xil_defaultlib.FIFO_ss
     );
 
 
-process (spi_clk, clk2)
-begin
-
-    -- At every rising edge of spi_clk send the MOSI data to FIFO if the chip select is high.
-    if (ss_n = '1') then 
-        state <= s_MOSI_to_FIFO;
-    end if;
-
-    -- After the sending of data has started, when the FIFO is filled till 10 bits assert the
-    -- Almost Full flag with which we can start a adjusted signals.
-    if (AF_Flag = '1') then
-        state <= s_GEN_ADJ_SIGNALS;
-    end if;
-
-    if (stop_clk2 = '1') then
-        state <= s_IDLE;
-    end if;
-
-end process;
-
-process(clk)
+process (clk)
 begin
     if rising_edge(clk) then
-        case state is 
-            when s_IDLE =>
-                s_Wr_DV <= '0';
-                s_Rd_DV <= '0';
-                start_clk2 <= '0';
-            when s_MOSI_to_FIFO =>
-                s_Wr_DV <= ss_n;
-            when s_GEN_ADJ_SIGNALS =>
-                a_ss_n <= '1';
-                start_clk2 <= '1';
-                s_Rd_DV <= AF_Flag;
-            when others =>
-                s_Wr_DV <= '0';
-                s_Rd_DV <= '0';
-                start_clk2 <= '0';
-        end case;
+        if rst = '0' then
+            s_Wr_DV <= '0';
+            s_Rd_DV <= '0';
+            start_clk2 <= '0';
+        else
+            -- State Transition logic
+            --state <= next_state;
+
+            case state is
+                when s_IDLE =>
+                    if AF_Flag = '1' then
+                        --next_state <= s_GEN_ADJ_SIGNALS;
+                        state <= s_GEN_ADJ_SIGNALS;
+                        start_clk2 <= '1';
+                        s_Rd_DV <= AF_Flag;
+                    
+                    else 
+                        --next_state <= s_IDLE;
+                        state <= s_IDLE;
+                    end if;
+
+                when s_GEN_ADJ_SIGNALS  =>
+                    if (count_clk2 = 16) then
+                        --next_state <= s_ONE_LAST_CYCLE;
+                        state <= s_ONE_LAST_CYCLE;
+                        s_Rd_DV <= '0';
+                    else
+                        --next_state <= s_GEN_ADJ_SIGNALS;
+                        state <= s_GEN_ADJ_SIGNALS;
+                    end if;
+                when s_ONE_LAST_CYCLE =>
+                    if (count_clk2 = 17) then
+                        --next_state <= s_IDLE;
+                        state <= s_IDLE;
+                        start_clk2 <= '0';
+                        s_Wr_DV <= '0';
+                        s_Rd_DV <= '0';
+                    else
+                        --next_state <= s_ONE_LAST_CYCLE;
+                        state <= s_ONE_LAST_CYCLE;
+                    end if;
+                when others => 
+                    --next_state <= s_IDLE;
+                    state <= s_IDLE;
+                    start_clk2 <= '0';
+                    s_Wr_DV <= '0';
+                    s_Rd_DV <= '0';
+            end case;
+        end if;
     end if;
 end process;
+
+--process (spi_clk, clk2)
+--begin
+--    if rising_edge(spi_clk) then
+        -- At every rising edge of spi_clk send the MOSI data to FIFO if the chip select is high.
+--        if (ss_n = '1') then 
+--            state <= s_MOSI_to_FIFO;
+--        end if;
+
+        -- After the sending of data has started, when the FIFO is filled till 10 bits assert the
+        -- Almost Full flag with which we can start a adjusted signals.
+--        if (AF_Flag = '1') then
+--            state <= s_GEN_ADJ_SIGNALS;
+--        end if;
+
+--        if (stop_clk2 = '1') then
+ --           state <= s_IDLE;
+--        end if;
+--    end if;
+--end process;
+
+--process(clk)
+--begin
+--    if rising_edge(clk) then
+--        case state is 
+--            when s_IDLE =>
+--                s_Wr_DV <= '0';
+--                s_Rd_DV <= '0';
+--                start_clk2 <= '0';
+--            when s_MOSI_to_FIFO =>
+--                s_Wr_DV <= ss_n;
+--            when s_GEN_ADJ_SIGNALS =>
+--                start_clk2 <= '1';
+--                s_Rd_DV <= AF_Flag;
+--            when others =>
+--                s_Wr_DV <= '0';
+--                s_Rd_DV <= '0';
+--                start_clk2 <= '0';
+--        end case;
+--    end if;
+--end process;
 
 
 process(clk)
@@ -139,7 +197,7 @@ begin
     if rising_edge(clk)then
         if (start_clk2 = '1') then
             count_to_gen_clk2 <= count_to_gen_clk2 + 1;
-            if (count_to_gen_clk2 = 4) then
+            if (count_to_gen_clk2 = 3) then
                 clk2 <= not clk2;
                 count_to_gen_clk2 <= 0;
             end if;
@@ -152,20 +210,20 @@ end process;
 
 process(clk2)
 begin
-    -- At every rising edge of the faster clock i.e clk2, increment the counter value by '1' and when
-    -- the counter reaches a value of '34' set the state to IDLE
-    
-    if (count_clk2 = 34) then
-        stop_clk2 <= '1';
-    else
-        stop_clk2 <= '0';
+    -- At every rising edge of the faster clock i.e clk2, increment the counter value by '1'
+    if rising_edge(clk2) then
+        if (count_clk2 <= 18) then
+            count_clk2 <= count_clk2 + 1;
+        else
+            count_clk2 <= 0;
+        end if;
     end if;
-    count_clk2 <= count_clk2 + 1;
 end process;
 
 a_spi_clk <= clk2;
 s_mosi(0) <= mosi;
-s_mosi(0) <= miso;
+s_miso(0) <= miso;
 a_mosi <= s_a_mosi(0);
+a_ss_n <= start_clk2;
 
 end Behavioral;
