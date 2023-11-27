@@ -53,7 +53,7 @@ architecture Behavioral of SS_Adjuster is
 
 ------------------------- MOSI ----------------------------
 
-type t_state_mosi is (s_IDLE, s_GEN_ADJ_SIGNALS, s_ONE_LAST_CYCLE);
+type t_state_mosi is (s_IDLE, s_GEN_ADJ_SIGNALS, s_ONE_LAST_CYCLE, s_STOP_CLK2);
 signal state, next_state : t_state_mosi := s_IDLE;
 
 -- flags and we are currently only interested in AF_Flag.
@@ -82,7 +82,7 @@ signal cmd_write : std_logic := '0';
 
 signal start_clk2, stop_clk2, clk2 : std_logic := '0';
 
-signal s_mosi, s_miso, s_a_mosi, s_a_miso : std_logic_vector(0 downto 0);
+signal s_mosi, s_miso, s_a_mosi, s_a_miso : std_logic_vector(0 downto 0) :=  "0" ;
 
 constant g_WIDTH : integer := 1;
 constant g_DEPTH : integer := 16;
@@ -123,7 +123,7 @@ MISO_FIFO: entity xil_defaultlib.FIFO_ss
         i_wClk   => spi_clk,
         i_Wr_DV    => miso_start_flag,
         i_Wr_Data  => s_miso,
-        i_AF_Level => 6,
+        i_AF_Level => 5,
         o_AF_Flag  => AF_Flag_miso,
         o_Full     => Full_flag,
 
@@ -180,7 +180,7 @@ begin
                     else
                         --next_state <= s_ONE_LAST_CYCLE;
                         state <= s_ONE_LAST_CYCLE;
-                    end if;
+                    end if;                   
                 when others => 
                     --next_state <= s_IDLE;
                     state <= s_IDLE;
@@ -199,29 +199,31 @@ begin
             s_Wr_DV_miso <= '0';
             s_Rd_DV_miso <= '0';
         else
-            case state_miso is
-                when s_IDLE_miso => 
-                    if (AF_Flag_miso = '1' and count_clk2 = 7) then
-                        state_miso <= s_READ_from_FIFO_miso;
-                        s_Rd_DV_miso <= AF_Flag_miso;
-                    else
-                        state_miso <= s_IDLE_miso;
-                    end if;
-                
-                    when s_READ_from_FIFO_miso =>
-                        if count_clk2 = 15 then
+            if (cmd_write = '0') then
+                case state_miso is
+                    when s_IDLE_miso => 
+                        if (AF_Flag_miso = '1' and count_clk2 = 8) then
+                            state_miso <= s_READ_from_FIFO_miso;
+                            s_Rd_DV_miso <= AF_Flag_miso;
+                        else
+                            state_miso <= s_IDLE_miso;
+                        end if;
+                    
+                        when s_READ_from_FIFO_miso =>
+                            if count_clk2 = 16 then
+                                state_miso <= s_IDLE_miso;
+                                s_Wr_DV_miso <= '0';
+                                s_Rd_DV_miso <= '0';
+                            else 
+                                state_miso <= s_READ_from_FIFO_miso;
+                            end if;
+                    when others =>
                             state_miso <= s_IDLE_miso;
                             s_Wr_DV_miso <= '0';
                             s_Rd_DV_miso <= '0';
-                        else 
-                            state_miso <= s_READ_from_FIFO_miso;
-                        end if;
-                when others =>
-                        state_miso <= s_IDLE_miso;
-                        s_Wr_DV_miso <= '0';
-                        s_Rd_DV_miso <= '0';
-            
-            end case;
+                
+                end case;
+            end if;
         end if;
     end if;
 end process;
@@ -288,9 +290,9 @@ process(clk2)
 begin
     -- At every rising edge of the faster clock i.e clk2, increment the counter value by '1'
     if rising_edge(clk2) then
-        if (count_clk2 <= 18) then
-            count_clk2 <= count_clk2 + 1;
-        else
+    --    if (count_clk2 < 16) then
+        count_clk2 <= count_clk2 + 1;
+        if count_clk2 = 17 then
             count_clk2 <= 0;
         end if;
     end if;
@@ -300,11 +302,18 @@ end process;
 process (spi_clk)
 begin
     if rising_edge(spi_clk) then
-        if count_spi_clk <= 16 then
-            count_spi_clk <= count_spi_clk + 1;
+        if (count_spi_clk = 0 and mosi = '1') then
+            cmd_write <= '1';
         else
-            count_spi_clk <= 0;
+            cmd_write <= '0';
         end if;
+        --if count_spi_clk < 15 then
+        count_spi_clk <= count_spi_clk + 1;
+        if count_spi_clk = 15 then
+            count_spi_clk <= 0;
+            cmd_write <= '0';
+        end if;
+        
     end if;
 end process;
 
@@ -314,6 +323,6 @@ s_miso(0) <= miso;
 a_miso <= s_a_miso(0);
 a_mosi <= s_a_mosi(0);
 a_ss_n <= start_clk2;
-miso_start_flag <= '1' when (count_spi_clk > 6 and count_spi_clk < 15) else '0';
+miso_start_flag <= '1' when (count_spi_clk > 7 and count_spi_clk < 17) else '0';
 
 end Behavioral;
