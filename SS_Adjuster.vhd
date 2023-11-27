@@ -123,7 +123,7 @@ MISO_FIFO: entity xil_defaultlib.FIFO_ss
         i_wClk   => spi_clk,
         i_Wr_DV    => miso_start_flag,
         i_Wr_Data  => s_miso,
-        i_AF_Level => 5,
+        i_AF_Level => 6,
         o_AF_Flag  => AF_Flag_miso,
         o_Full     => Full_flag,
 
@@ -209,7 +209,7 @@ begin
                     end if;
                 
                     when s_READ_from_FIFO_miso =>
-                        if count_spi_clk = 16 then
+                        if count_clk2 = 15 then
                             state_miso <= s_IDLE_miso;
                             s_Wr_DV_miso <= '0';
                             s_Rd_DV_miso <= '0';
@@ -314,6 +314,6 @@ s_miso(0) <= miso;
 a_miso <= s_a_miso(0);
 a_mosi <= s_a_mosi(0);
 a_ss_n <= start_clk2;
-miso_start_flag <= '1' when count_spi_clk >= 7 else '0';
+miso_start_flag <= '1' when (count_spi_clk > 6 and count_spi_clk < 15) else '0';
 
 end Behavioral;

@@ -93,7 +93,7 @@ p_write:  process (i_wClk, i_Rst_L) is
     elsif rising_edge(i_wClk) then     
             -- Write
             if (i_Wr_DV = '1') then   -- ss_n is high i.e chip select is active
-                if (wr_count = 15) then
+                if (wr_count = DEPTH - 1) then
                 wr_count <= 0;
                 else
                     wr_count <= wr_count + 1;
@@ -126,14 +126,14 @@ p_read: process (i_rClk, i_Rst_L) is
       
         -- Read
       if (i_Rd_En = '1')then
-        if rd_count = 15 then
+        if rd_count = DEPTH - 1 then
             rd_count <= 0;
         else
             rd_count <= rd_count + 1;
         end if;
       end if;
-      s_Rd_Addr <= std_logic_vector(to_unsigned(rd_count, s_Rd_Addr'length));
     end if;
+    s_Rd_Addr <= std_logic_vector(to_unsigned(rd_count, s_Rd_Addr'length));
   end process;
 
   o_Full <= '1' when ((r_Count = DEPTH) or (r_Count = DEPTH-1 and i_Wr_DV = '1' and i_Rd_En = '0')) else '0';
