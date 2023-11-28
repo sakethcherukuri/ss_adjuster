@@ -199,9 +199,105 @@ begin
     s_spi_clk <= '1';
     wait for 80 ns;
     s_spi_clk <= '0';
+    wait for 1710 ns;
+    
+    ------------------------------------------------------------------------
+    ------------------------------------------------------------------------
+
+    s_spi_clk <= '1';
+    wait for 80 ns;
+    s_spi_clk <= '0';
     wait for 80 ns;
     
+    -- 2nd rising edge
+    s_spi_clk <= '1';
+    wait for 80 ns;
+    s_spi_clk <= '0';
+    wait for 80 ns;
     
+    -- 3rd rising edge
+    s_spi_clk <= '1';
+    wait for 80 ns;
+    s_spi_clk <= '0';
+    wait for 80 ns;
+    
+    -- 4th rising edge
+    s_spi_clk <= '1';
+    wait for 80 ns;
+    s_spi_clk <= '0';
+    wait for 80 ns;
+    
+    -- 5th rising edge
+    s_spi_clk <= '1';
+    wait for 80 ns;
+    s_spi_clk <= '0';
+    wait for 80 ns;
+    
+    -- 6th rising edge
+    s_spi_clk <= '1';
+    wait for 80 ns;
+    s_spi_clk <= '0';
+    wait for 80 ns;
+    
+    -- 7th rising edge
+    s_spi_clk <= '1';
+    wait for 80 ns;
+    s_spi_clk <= '0';
+    wait for 80 ns;
+    
+    -- 8th rising edge
+    s_spi_clk <= '1';
+    wait for 80 ns;
+    s_spi_clk <= '0';
+    wait for 80 ns;
+    
+    -- 9th rising edge
+    s_spi_clk <= '1';
+    wait for 80 ns;
+    s_spi_clk <= '0';
+    wait for 80 ns;
+    
+    -- 10th rising edge
+    s_spi_clk <= '1';
+    wait for 80 ns;
+    s_spi_clk <= '0';
+    wait for 80 ns;
+    
+    -- 11th rising edge
+    s_spi_clk <= '1';
+    wait for 80 ns;
+    s_spi_clk <= '0';
+    wait for 80 ns;
+    
+    -- 12th rising edge
+    s_spi_clk <= '1';
+    wait for 80 ns;
+    s_spi_clk <= '0';
+    wait for 80 ns;
+    
+    -- 13th rising edge
+    s_spi_clk <= '1';
+    wait for 80 ns;
+    s_spi_clk <= '0';
+    wait for 80 ns;
+    
+    -- 14th rising edge
+    s_spi_clk <= '1';
+    wait for 80 ns;
+    s_spi_clk <= '0';
+    wait for 80 ns;
+    
+    -- 15th rising edge
+    s_spi_clk <= '1';
+    wait for 80 ns;
+    s_spi_clk <= '0';
+    wait for 80 ns;
+    
+    -- 16th rising edge
+    s_spi_clk <= '1';
+    wait for 80 ns;
+    s_spi_clk <= '0';
+    wait for 1660 ns;
     wait;
 
 
@@ -212,7 +308,7 @@ begin
     s_mosi <= '0';
     wait for 1040 ns;
     -- Control bit = 7th bit
-    s_mosi <= '1';
+    s_mosi <= '0';
     wait for 160 ns;
     
     -- A6 bit
@@ -273,8 +369,75 @@ begin
     
     --D0 bit
     s_miso <= '1';
+    wait for 1600 ns;
+
+    
+    ------------------------------------------------------------------------------------
+    -------------------------------- Second Transcation --------------------------------
+    ------------------------------------------------------------------------------------
+
+    s_mosi <= '1';
     wait for 160 ns;
     
+    -- A6 bit
+    s_mosi <= '1';
+    wait for 160 ns;
+    
+    -- A5 bit
+    s_mosi <= '0';
+    wait for 160 ns;
+    
+    -- A4 bit
+    s_mosi <= '1';
+    wait for 160 ns;
+    
+    -- A3 bit
+    s_mosi <= '0';
+    wait for 160 ns;
+    
+    -- A2 bit
+    s_mosi <= '1';
+    wait for 160 ns;
+    
+    -- A1 bit
+    s_mosi <= '1';
+    wait for 160 ns;
+      
+    -- A0 bit
+    s_mosi <= '0';
+    wait for 160 ns;
+    
+    -- D7 bit
+    s_mosi <= '1';
+    wait for 160 ns;
+    
+    -- D6 bit
+    s_mosi <= '1';
+    wait for 160 ns;
+    
+    -- D5 bit
+    s_mosi <= '0';
+    wait for 160 ns;
+    
+    -- D4 bit
+    s_mosi <= '1';
+    wait for 160 ns;
+    
+    -- D3 bit
+    s_mosi <= '0';
+    wait for 160 ns;
+    
+    -- D2 bit
+    s_mosi <= '1';
+    wait for 160 ns;
+    
+    -- D1 bit
+    s_mosi <= '1';
+    wait for 160 ns;
+      
+    -- D0 bit
+    s_mosi <= '0';
+    wait for 160 ns;
     
     wait;
 end process;

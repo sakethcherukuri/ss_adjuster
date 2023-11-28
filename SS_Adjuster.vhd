@@ -75,7 +75,7 @@ signal s_Wr_DV_miso, s_Rd_DV_miso : std_logic := '0';
 ------------------------- MISO ----------------------------
 
 -- Signals that count
-signal count_clk2, count_spi_clk, count_to_gen_clk2 : integer := 0;
+signal count_clk2, count_spi_clk, count_to_gen_clk2, count : integer := 0;
 
 -- Write or Read control bit
 signal cmd_write : std_logic := '0';
@@ -162,7 +162,8 @@ begin
                     end if;
 
                 when s_GEN_ADJ_SIGNALS  =>
-                    if (count_clk2 = 16) then
+                    --if (count_clk2 = 16) then
+                    if (count = 32) then
                         --next_state <= s_ONE_LAST_CYCLE;
                         state <= s_ONE_LAST_CYCLE;
                         s_Rd_DV_mosi <= '0';
@@ -171,7 +172,8 @@ begin
                         state <= s_GEN_ADJ_SIGNALS;
                     end if;
                 when s_ONE_LAST_CYCLE =>
-                    if (count_clk2 = 17) then
+                    --if (count_clk2 = 17) then
+                    if (count = 33) then
                         --next_state <= s_IDLE;
                         state <= s_IDLE;
                         start_clk2 <= '0';
@@ -202,7 +204,8 @@ begin
             if (cmd_write = '0') then
                 case state_miso is
                     when s_IDLE_miso => 
-                        if (AF_Flag_miso = '1' and count_clk2 = 8) then
+                        --if (AF_Flag_miso = '1' and count_clk2 = 8) then
+                        if (AF_Flag_miso = '1' and count = 16) then
                             state_miso <= s_READ_from_FIFO_miso;
                             s_Rd_DV_miso <= AF_Flag_miso;
                         else
@@ -210,7 +213,8 @@ begin
                         end if;
                     
                         when s_READ_from_FIFO_miso =>
-                            if count_clk2 = 16 then
+                            --if count_clk2 = 16 then
+                            if (count = 32) then
                                 state_miso <= s_IDLE_miso;
                                 s_Wr_DV_miso <= '0';
                                 s_Rd_DV_miso <= '0';
@@ -278,9 +282,11 @@ begin
             if (count_to_gen_clk2 = 3) then
                 clk2 <= not clk2;
                 count_to_gen_clk2 <= 0;
+                count <= count + 1;
             end if;
         else 
             clk2 <= '0';
+            count <= 0;
         end if;
     end if;
 
@@ -292,7 +298,7 @@ begin
     if rising_edge(clk2) then
     --    if (count_clk2 < 16) then
         count_clk2 <= count_clk2 + 1;
-        if count_clk2 = 17 then
+        if start_clk2 = '0' then
             count_clk2 <= 0;
         end if;
     end if;
@@ -304,7 +310,7 @@ begin
     if rising_edge(spi_clk) then
         if (count_spi_clk = 0 and mosi = '1') then
             cmd_write <= '1';
-        else
+        elsif (count_spi_clk = 0 and mosi = '0') then
             cmd_write <= '0';
         end if;
         --if count_spi_clk < 15 then
