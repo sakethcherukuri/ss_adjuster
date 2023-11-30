@@ -338,108 +338,116 @@ begin
     -- A0 bit
     s_mosi <= '0';
     wait for 640 ns;
-    
-    --D7 bit
-    s_miso <= '1';
-    wait for 30 ns;
-        
-    --D6 bit
-    s_miso <= '0';
-    wait for 30 ns;
-    
-    --D5 bit
-    s_miso <= '0';
-    wait for 30 ns;
-    
-    --D4 bit
-    s_miso <= '0';
-    wait for 30 ns;
-    
-    --D3 bit
-    s_miso <= '1';
-    wait for 30 ns;
-    
-    --D2 bit
-    s_miso <= '0';
-    wait for 30 ns;
-    
-    --D1 bit
-    s_miso <= '0';
-    wait for 30 ns;
-    
-    --D0 bit
-    s_miso <= '1';
-    wait for 1600 ns;
 
-    
     ------------------------------------------------------------------------------------
     -------------------------------- Second Transcation --------------------------------
     ------------------------------------------------------------------------------------
 
-    s_mosi <= '1';
+    --s_mosi <= '1';
     wait for 160 ns;
     
     -- A6 bit
-    s_mosi <= '1';
+    --s_mosi <= '1';
     wait for 160 ns;
     
     -- A5 bit
-    s_mosi <= '0';
+    --s_mosi <= '0';
     wait for 160 ns;
     
     -- A4 bit
-    s_mosi <= '1';
+    --s_mosi <= '1';
     wait for 160 ns;
     
     -- A3 bit
-    s_mosi <= '0';
+    ----s_mosi <= '0';
     wait for 160 ns;
     
     -- A2 bit
-    s_mosi <= '1';
+    --s_mosi <= '1';
     wait for 160 ns;
     
     -- A1 bit
-    s_mosi <= '1';
+    --s_mosi <= '1';
     wait for 160 ns;
       
     -- A0 bit
-    s_mosi <= '0';
+    --s_mosi <= '0';
     wait for 160 ns;
     
     -- D7 bit
-    s_mosi <= '1';
+    --s_mosi <= '1';
     wait for 160 ns;
     
     -- D6 bit
-    s_mosi <= '1';
+    --s_mosi <= '1';
     wait for 160 ns;
     
     -- D5 bit
-    s_mosi <= '0';
+    --s_mosi <= '0';
     wait for 160 ns;
     
     -- D4 bit
-    s_mosi <= '1';
+    --s_mosi <= '1';
     wait for 160 ns;
     
     -- D3 bit
-    s_mosi <= '0';
+    --s_mosi <= '0';
     wait for 160 ns;
     
     -- D2 bit
-    s_mosi <= '1';
+    --s_mosi <= '1';
     wait for 160 ns;
     
     -- D1 bit
-    s_mosi <= '1';
+    --s_mosi <= '1';
     wait for 160 ns;
       
     -- D0 bit
-    s_mosi <= '0';
+    --s_mosi <= '0';
     wait for 160 ns;
     
     wait;
+end process;
+
+
+process
+begin
+    
+    wait for 5745 ns;
+    --D7 bit
+    s_miso <= '1';
+    wait for 60 ns;
+        
+    --D6 bit
+    s_miso <= '0';
+    wait for 60 ns;
+
+    --D5 bit
+    s_miso <= '0';
+    wait for 60 ns;
+
+    --D4 bit
+    s_miso <= '0';
+    wait for 60 ns;
+
+    --D3 bit
+    s_miso <= '1';
+    wait for 60 ns;
+
+    --D2 bit
+    s_miso <= '0';
+    wait for 60 ns;
+
+    --D1 bit
+    s_miso <= '0';
+    wait for 60 ns;
+
+    --D0 bit
+    s_miso <= '1';
+    wait for 60 ns;
+    s_miso <= '0';
+
+
 end process;
 
 

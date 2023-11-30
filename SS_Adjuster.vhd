@@ -150,11 +150,11 @@ begin
 
             case state is
                 when s_IDLE =>
-                    if AF_Flag = '1' then
+                    if (AF_Flag = '1' and count_spi_clk = 7) then
                         --next_state <= s_GEN_ADJ_SIGNALS;
                         state <= s_GEN_ADJ_SIGNALS;
                         start_clk2 <= '1';
-                        s_Rd_DV_mosi <= AF_Flag;
+                        s_Rd_DV_mosi <= '1';
                     
                     else 
                         --next_state <= s_IDLE;
@@ -205,16 +205,16 @@ begin
                 case state_miso is
                     when s_IDLE_miso => 
                         --if (AF_Flag_miso = '1' and count_clk2 = 8) then
-                        if (AF_Flag_miso = '1' and count = 16) then
+                        if (count_spi_clk = 8) then
                             state_miso <= s_READ_from_FIFO_miso;
-                            s_Rd_DV_miso <= AF_Flag_miso;
+                            s_Rd_DV_miso <= '1';
                         else
                             state_miso <= s_IDLE_miso;
                         end if;
                     
                         when s_READ_from_FIFO_miso =>
                             --if count_clk2 = 16 then
-                            if (count = 32) then
+                            if (count_spi_clk = 15) then
                                 state_miso <= s_IDLE_miso;
                                 s_Wr_DV_miso <= '0';
                                 s_Rd_DV_miso <= '0';
@@ -231,48 +231,6 @@ begin
         end if;
     end if;
 end process;
-
---process (spi_clk, clk2)
---begin
---    if rising_edge(spi_clk) then
-        -- At every rising edge of spi_clk send the MOSI data to FIFO if the chip select is high.
---        if (ss_n = '1') then 
---            state <= s_MOSI_to_FIFO;
---        end if;
-
-        -- After the sending of data has started, when the FIFO is filled till 10 bits assert the
-        -- Almost Full flag with which we can start a adjusted signals.
---        if (AF_Flag = '1') then
---            state <= s_GEN_ADJ_SIGNALS;
---        end if;
-
---        if (stop_clk2 = '1') then
- --           state <= s_IDLE;
---        end if;
---    end if;
---end process;
-
---process(clk)
---begin
---    if rising_edge(clk) then
---        case state is 
---            when s_IDLE =>
---                s_Wr_DV <= '0';
---                s_Rd_DV <= '0';
---                start_clk2 <= '0';
---            when s_MOSI_to_FIFO =>
---                s_Wr_DV <= ss_n;
---            when s_GEN_ADJ_SIGNALS =>
---                start_clk2 <= '1';
---                s_Rd_DV <= AF_Flag;
---            when others =>
---                s_Wr_DV <= '0';
---                s_Rd_DV <= '0';
---                start_clk2 <= '0';
---        end case;
---    end if;
---end process;
-
 
 process(clk)
 begin
@@ -329,6 +287,6 @@ s_miso(0) <= miso;
 a_miso <= s_a_miso(0);
 a_mosi <= s_a_mosi(0);
 a_ss_n <= start_clk2;
-miso_start_flag <= '1' when (count > 14 and count < 33) else '0';
+miso_start_flag <= '1' when (count > 15 and count < 32) else '0';
 
 end Behavioral;
