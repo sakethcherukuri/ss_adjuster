@@ -99,7 +99,7 @@ MOSI_FIFO: entity xil_defaultlib.FIFO_ss
         i_wClk   => spi_clk,
         i_Wr_DV    => ss_n,
         i_Wr_Data  => s_mosi,
-        i_AF_Level => 10,
+        i_AF_Level => 7,
         o_AF_Flag  => AF_Flag,
         o_Full     => Full_flag,
 
@@ -120,7 +120,7 @@ MISO_FIFO: entity xil_defaultlib.FIFO_ss
     )
     port map (
         i_Rst_L => rst,
-        i_wClk   => spi_clk,
+        i_wClk   => clk2,
         i_Wr_DV    => miso_start_flag,
         i_Wr_Data  => s_miso,
         i_AF_Level => 5,
@@ -128,7 +128,7 @@ MISO_FIFO: entity xil_defaultlib.FIFO_ss
         o_Full     => Full_flag,
 
         -- Read Side
-        i_rClk   => clk2,
+        i_rClk   => spi_clk,
         i_Rd_En    => s_Rd_DV_miso,
         o_Rd_DV    => AE_Flag,
         o_Rd_Data  => s_a_miso,
@@ -279,7 +279,7 @@ begin
     if rising_edge(clk)then
         if (start_clk2 = '1') then
             count_to_gen_clk2 <= count_to_gen_clk2 + 1;
-            if (count_to_gen_clk2 = 3) then
+            if (count_to_gen_clk2 = 2) then
                 clk2 <= not clk2;
                 count_to_gen_clk2 <= 0;
                 count <= count + 1;
@@ -329,6 +329,6 @@ s_miso(0) <= miso;
 a_miso <= s_a_miso(0);
 a_mosi <= s_a_mosi(0);
 a_ss_n <= start_clk2;
-miso_start_flag <= '1' when (count_spi_clk > 7 and count_spi_clk < 17) else '0';
+miso_start_flag <= '1' when (count > 14 and count < 33) else '0';
 
 end Behavioral;
