@@ -147,49 +147,93 @@ begin
         else
             -- State Transition logic
             --state <= next_state;
+            if (cmd_write = '0') then
+                case state is
+                    when s_IDLE =>
+                        if (AF_Flag = '1' and count_spi_clk = 7) then
+                            --next_state <= s_GEN_ADJ_SIGNALS;
+                            state <= s_GEN_ADJ_SIGNALS;
+                            start_clk2 <= '1';
+                            s_Rd_DV_mosi <= '1';
+                        
+                        else 
+                            --next_state <= s_IDLE;
+                            state <= s_IDLE;
+                        end if;
 
-            case state is
-                when s_IDLE =>
-                    if (AF_Flag = '1' and count_spi_clk = 7) then
-                        --next_state <= s_GEN_ADJ_SIGNALS;
-                        state <= s_GEN_ADJ_SIGNALS;
-                        start_clk2 <= '1';
-                        s_Rd_DV_mosi <= '1';
-                    
-                    else 
-                        --next_state <= s_IDLE;
-                        state <= s_IDLE;
-                    end if;
-
-                when s_GEN_ADJ_SIGNALS  =>
-                    --if (count_clk2 = 16) then
-                    if (count = 32) then
-                        --next_state <= s_ONE_LAST_CYCLE;
-                        state <= s_ONE_LAST_CYCLE;
-                        s_Rd_DV_mosi <= '0';
-                    else
-                        --next_state <= s_GEN_ADJ_SIGNALS;
-                        state <= s_GEN_ADJ_SIGNALS;
-                    end if;
-                when s_ONE_LAST_CYCLE =>
-                    --if (count_clk2 = 17) then
-                    if (count = 33) then
+                    when s_GEN_ADJ_SIGNALS  =>
+                        --if (count_clk2 = 16) then
+                        if (count = 32) then
+                            --next_state <= s_ONE_LAST_CYCLE;
+                            state <= s_ONE_LAST_CYCLE;
+                            s_Rd_DV_mosi <= '0';
+                        else
+                            --next_state <= s_GEN_ADJ_SIGNALS;
+                            state <= s_GEN_ADJ_SIGNALS;
+                        end if;
+                    when s_ONE_LAST_CYCLE =>
+                        --if (count_clk2 = 17) then
+                        if (count = 33) then
+                            --next_state <= s_IDLE;
+                            state <= s_IDLE;
+                            start_clk2 <= '0';
+                            s_Wr_DV_mosi <= '0';
+                            s_Rd_DV_mosi <= '0';
+                        else
+                            --next_state <= s_ONE_LAST_CYCLE;
+                            state <= s_ONE_LAST_CYCLE;
+                        end if;                   
+                    when others => 
                         --next_state <= s_IDLE;
                         state <= s_IDLE;
                         start_clk2 <= '0';
                         s_Wr_DV_mosi <= '0';
                         s_Rd_DV_mosi <= '0';
-                    else
-                        --next_state <= s_ONE_LAST_CYCLE;
-                        state <= s_ONE_LAST_CYCLE;
-                    end if;                   
-                when others => 
-                    --next_state <= s_IDLE;
-                    state <= s_IDLE;
-                    start_clk2 <= '0';
-                    s_Wr_DV_mosi <= '0';
-                    s_Rd_DV_mosi <= '0';
-            end case;
+                end case;
+            else
+                case state is
+                    when s_IDLE =>
+                        if (AF_Flag = '1' and count_spi_clk = 15) then
+                            --next_state <= s_GEN_ADJ_SIGNALS;
+                            state <= s_GEN_ADJ_SIGNALS;
+                            start_clk2 <= '1';
+                            s_Rd_DV_mosi <= '1';
+                        
+                        else 
+                            --next_state <= s_IDLE;
+                            state <= s_IDLE;
+                        end if;
+
+                    when s_GEN_ADJ_SIGNALS  =>
+                        --if (count_clk2 = 16) then
+                        if (count = 32) then
+                            --next_state <= s_ONE_LAST_CYCLE;
+                            state <= s_ONE_LAST_CYCLE;
+                            s_Rd_DV_mosi <= '0';
+                        else
+                            --next_state <= s_GEN_ADJ_SIGNALS;
+                            state <= s_GEN_ADJ_SIGNALS;
+                        end if;
+                    when s_ONE_LAST_CYCLE =>
+                        --if (count_clk2 = 17) then
+                        if (count = 33) then
+                            --next_state <= s_IDLE;
+                            state <= s_IDLE;
+                            start_clk2 <= '0';
+                            s_Wr_DV_mosi <= '0';
+                            s_Rd_DV_mosi <= '0';
+                        else
+                            --next_state <= s_ONE_LAST_CYCLE;
+                            state <= s_ONE_LAST_CYCLE;
+                        end if;                   
+                    when others => 
+                        --next_state <= s_IDLE;
+                        state <= s_IDLE;
+                        start_clk2 <= '0';
+                        s_Wr_DV_mosi <= '0';
+                        s_Rd_DV_mosi <= '0';
+                end case;
+            end if;
         end if;
     end if;
 end process;

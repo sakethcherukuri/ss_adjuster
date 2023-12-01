@@ -64,9 +64,12 @@ signal s_a_ss_n : std_logic := '0';
 signal s_a_spi_clk : std_logic := '0';
 signal s_a_mosi : std_logic := '0';
 signal s_a_miso : std_logic := '0';
+signal test : std_logic := '0';
+
 
 constant spi_clk_period : time := 160 ns;
 constant clk_period : time := 10 ns;
+constant i : integer := 1;
 
 
 begin
@@ -91,6 +94,17 @@ begin
     wait for clk_period/2;
     s_clk <= '1';
     wait for clk_period/2;
+end process;
+
+process 
+begin
+    for i in 1 to 16 loop
+        test <= '0';
+        wait for 20 ns;
+        test <= '1';
+        wait for 20 ns;
+    end loop; -- spi_clk_loop
+        wait;
 end process;
 
 process
@@ -199,103 +213,104 @@ begin
     s_spi_clk <= '1';
     wait for 320 ns;
     s_spi_clk <= '0';
-    wait for 320 ns;
+    wait for 1000 ns;
     
-    ------------------------------------------------------------------------
-    ------------------------------------------------------------------------
+    ------------------------------------------------------------------------------------
+    -------------------------------- Second Transcation --------------------------------
+    ------------------------------------------------------------------------------------
 
     s_spi_clk <= '1';
-    wait for 80 ns;
+    wait for 320 ns;
     s_spi_clk <= '0';
-    wait for 80 ns;
+    wait for 320 ns;
     
     -- 2nd rising edge
     s_spi_clk <= '1';
-    wait for 80 ns;
+    wait for 320 ns;
     s_spi_clk <= '0';
-    wait for 80 ns;
+    wait for 320 ns;
     
     -- 3rd rising edge
     s_spi_clk <= '1';
-    wait for 80 ns;
+    wait for 320 ns;
     s_spi_clk <= '0';
-    wait for 80 ns;
+    wait for 320 ns;
     
     -- 4th rising edge
     s_spi_clk <= '1';
-    wait for 80 ns;
+    wait for 320 ns;
     s_spi_clk <= '0';
-    wait for 80 ns;
+    wait for 320 ns;
     
     -- 5th rising edge
     s_spi_clk <= '1';
-    wait for 80 ns;
+    wait for 320 ns;
     s_spi_clk <= '0';
-    wait for 80 ns;
+    wait for 320 ns;
     
     -- 6th rising edge
     s_spi_clk <= '1';
-    wait for 80 ns;
+    wait for 320 ns;
     s_spi_clk <= '0';
-    wait for 80 ns;
+    wait for 320 ns;
     
     -- 7th rising edge
     s_spi_clk <= '1';
-    wait for 80 ns;
+    wait for 320 ns;
     s_spi_clk <= '0';
-    wait for 80 ns;
+    wait for 320 ns;
     
     -- 8th rising edge
     s_spi_clk <= '1';
-    wait for 80 ns;
+    wait for 320 ns;
     s_spi_clk <= '0';
-    wait for 80 ns;
+    wait for 320 ns;
     
     -- 9th rising edge
     s_spi_clk <= '1';
-    wait for 80 ns;
+    wait for 320 ns;
     s_spi_clk <= '0';
-    wait for 80 ns;
+    wait for 320 ns;
     
     -- 10th rising edge
     s_spi_clk <= '1';
-    wait for 80 ns;
+    wait for 320 ns;
     s_spi_clk <= '0';
-    wait for 80 ns;
+    wait for 320 ns;
     
     -- 11th rising edge
     s_spi_clk <= '1';
-    wait for 80 ns;
+    wait for 320 ns;
     s_spi_clk <= '0';
-    wait for 80 ns;
+    wait for 320 ns;
     
     -- 12th rising edge
     s_spi_clk <= '1';
-    wait for 80 ns;
+    wait for 320 ns;
     s_spi_clk <= '0';
-    wait for 80 ns;
+    wait for 320 ns;
     
     -- 13th rising edge
     s_spi_clk <= '1';
-    wait for 80 ns;
+    wait for 320 ns;
     s_spi_clk <= '0';
-    wait for 80 ns;
+    wait for 320 ns;
     
     -- 14th rising edge
     s_spi_clk <= '1';
-    wait for 80 ns;
+    wait for 320 ns;
     s_spi_clk <= '0';
-    wait for 80 ns;
+    wait for 320 ns;
     
     -- 15th rising edge
     s_spi_clk <= '1';
-    wait for 80 ns;
+    wait for 320 ns;
     s_spi_clk <= '0';
-    wait for 80 ns;
+    wait for 320 ns;
     
     -- 16th rising edge
     s_spi_clk <= '1';
-    wait for 80 ns;
+    wait for 320 ns;
     s_spi_clk <= '0';
     wait for 1660 ns;
     wait;
@@ -337,74 +352,74 @@ begin
       
     -- A0 bit
     s_mosi <= '0';
-    wait for 640 ns;
+    wait for 6400 ns;
 
     ------------------------------------------------------------------------------------
     -------------------------------- Second Transcation --------------------------------
     ------------------------------------------------------------------------------------
 
-    --s_mosi <= '1';
-    wait for 160 ns;
+    s_mosi <= '1';
+    wait for 640 ns;
     
     -- A6 bit
-    --s_mosi <= '1';
-    wait for 160 ns;
+    s_mosi <= '1';
+    wait for 640 ns;
     
     -- A5 bit
-    --s_mosi <= '0';
-    wait for 160 ns;
+    s_mosi <= '0';
+    wait for 640 ns;
     
     -- A4 bit
-    --s_mosi <= '1';
-    wait for 160 ns;
+    s_mosi <= '1';
+    wait for 640 ns;
     
     -- A3 bit
-    ----s_mosi <= '0';
-    wait for 160 ns;
+    s_mosi <= '0';
+    wait for 640 ns;
     
     -- A2 bit
-    --s_mosi <= '1';
-    wait for 160 ns;
+    s_mosi <= '1';
+    wait for 640 ns;
     
     -- A1 bit
-    --s_mosi <= '1';
-    wait for 160 ns;
+    s_mosi <= '1';
+    wait for 640 ns;
       
     -- A0 bit
-    --s_mosi <= '0';
-    wait for 160 ns;
+    s_mosi <= '0';
+    wait for 640 ns;
     
     -- D7 bit
-    --s_mosi <= '1';
-    wait for 160 ns;
+    s_mosi <= '1';
+    wait for 640 ns;
     
     -- D6 bit
-    --s_mosi <= '1';
-    wait for 160 ns;
+    s_mosi <= '1';
+    wait for 640 ns;
     
     -- D5 bit
-    --s_mosi <= '0';
-    wait for 160 ns;
+    s_mosi <= '0';
+    wait for 640 ns;
     
     -- D4 bit
-    --s_mosi <= '1';
-    wait for 160 ns;
+    s_mosi <= '1';
+    wait for 640 ns;
     
     -- D3 bit
-    --s_mosi <= '0';
-    wait for 160 ns;
+    s_mosi <= '0';
+    wait for 640 ns;
     
     -- D2 bit
-    --s_mosi <= '1';
-    wait for 160 ns;
+    s_mosi <= '1';
+    wait for 640 ns;
     
     -- D1 bit
-    --s_mosi <= '1';
-    wait for 160 ns;
+    s_mosi <= '1';
+    wait for 640 ns;
       
     -- D0 bit
-    --s_mosi <= '0';
-    wait for 160 ns;
+    s_mosi <= '0';
+    wait for 640 ns;
     
     wait;
 end process;
@@ -416,38 +431,38 @@ begin
     wait for 5745 ns;
     --D7 bit
     s_miso <= '1';
-    wait for 60 ns;
+    wait for 30 ns;
         
     --D6 bit
     s_miso <= '0';
-    wait for 60 ns;
+    wait for 30 ns;
 
     --D5 bit
     s_miso <= '0';
-    wait for 60 ns;
+    wait for 30 ns;
 
     --D4 bit
     s_miso <= '0';
-    wait for 60 ns;
+    wait for 30 ns;
 
     --D3 bit
     s_miso <= '1';
-    wait for 60 ns;
+    wait for 30 ns;
 
     --D2 bit
     s_miso <= '0';
-    wait for 60 ns;
+    wait for 30 ns;
 
     --D1 bit
     s_miso <= '0';
-    wait for 60 ns;
+    wait for 30 ns;
 
     --D0 bit
     s_miso <= '1';
-    wait for 60 ns;
+    wait for 30 ns;
     s_miso <= '0';
 
-
+    wait;
 end process;
 
 
