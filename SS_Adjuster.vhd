@@ -104,7 +104,7 @@ MOSI_FIFO: entity xil_defaultlib.FIFO_ss
         o_Full     => Full_flag,
 
         -- Read Side
-        i_rClk   => clk2,
+        i_rClk   => clk,
         i_Rd_En    => s_Rd_DV_mosi,
         o_Rd_DV    => AE_Flag,
         o_Rd_Data  => s_a_mosi,
@@ -120,7 +120,7 @@ MISO_FIFO: entity xil_defaultlib.FIFO_ss
     )
     port map (
         i_Rst_L => rst,
-        i_wClk   => clk2,
+        i_wClk   => clk,
         i_Wr_DV    => miso_start_flag,
         i_Wr_Data  => s_miso,
         i_AF_Level => 5,
@@ -294,17 +294,6 @@ begin
 
 end process;
 
-process(clk2)
-begin
-    -- At every rising edge of the faster clock i.e clk2, increment the counter value by '1'
-    if rising_edge(clk2) then
-    --    if (count_clk2 < 16) then
-        count_clk2 <= count_clk2 + 1;
-        if start_clk2 = '0' then
-            count_clk2 <= 0;
-        end if;
-    end if;
-end process;
 
 
 process (spi_clk)
@@ -332,5 +321,6 @@ a_miso <= s_a_miso(0);
 a_mosi <= s_a_mosi(0);
 a_ss_n <= start_clk2;
 miso_start_flag <= '1' when (count > 15 and count < 32) else '0';
+s_Wr_En <= miso_start_flag and 
 
 end Behavioral;
