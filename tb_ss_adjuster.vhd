@@ -428,38 +428,38 @@ end process;
 process
 begin
     
-    wait for 5745 ns;
+    wait for 5895 ns;
     --D7 bit
     s_miso <= '1';
-    wait for 30 ns;
+    wait for 40 ns;
         
     --D6 bit
     s_miso <= '0';
-    wait for 30 ns;
+    wait for 40 ns;
 
     --D5 bit
     s_miso <= '0';
-    wait for 30 ns;
+    wait for 40 ns;
 
     --D4 bit
     s_miso <= '0';
-    wait for 30 ns;
+    wait for 40 ns;
 
     --D3 bit
     s_miso <= '1';
-    wait for 30 ns;
+    wait for 40 ns;
 
     --D2 bit
     s_miso <= '0';
-    wait for 30 ns;
+    wait for 40 ns;
 
     --D1 bit
     s_miso <= '0';
-    wait for 30 ns;
+    wait for 40 ns;
 
     --D0 bit
     s_miso <= '1';
-    wait for 30 ns;
+    wait for 40 ns;
     s_miso <= '0';
 
     wait;

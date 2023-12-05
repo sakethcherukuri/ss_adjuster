@@ -122,7 +122,7 @@ p_read: process (i_rClk, i_Rst_L) is
     if (i_Rst_L = '0') then
       s_Rd_Addr <= "0000";
      -- r_Count   <= 0;
-    elsif rising_edge(i_rClk) then
+    elsif falling_edge(i_rClk) then
       
         -- Read
       if (i_Rd_En = '1')then

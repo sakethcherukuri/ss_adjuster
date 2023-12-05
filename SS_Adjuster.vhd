@@ -88,6 +88,7 @@ signal s_mosi, s_miso, s_a_mosi, s_a_miso : std_logic_vector(0 downto 0) :=  "0"
 
 constant g_WIDTH : integer := 1;
 constant g_DEPTH : integer := 16;
+constant COUNT_MAX : integer := 3;
 
 begin
 					
@@ -149,10 +150,13 @@ begin
         else
             -- State Transition logic
             --state <= next_state;
+            ---------------------------------------------------------------------------------------------
+            --------------------------------------- State for Read --------------------------------------
+            ---------------------------------------------------------------------------------------------
             if (cmd_write = '0') then
                 case state is
                     when s_IDLE =>
-                        if (AF_Flag = '1' and count_spi_clk = 7) then
+                        if (AF_Flag = '1' and count_spi_clk = 8) then
                             --next_state <= s_GEN_ADJ_SIGNALS;
                             state <= s_GEN_ADJ_SIGNALS;
                             start_clk2 <= '1';
@@ -165,7 +169,9 @@ begin
 
                     when s_GEN_ADJ_SIGNALS  =>
                         --if (count_clk2 = 16) then
-                        if (count = 5) then
+                        if (count < COUNT_MAX) then
+                            s_Rd_DV_mosi <= '0';
+                        elsif (count = COUNT_MAX) then
                             --next_state <= s_ONE_LAST_CYCLE;
                             state <= s_FAST_CLK_1;
                             s_Rd_DV_mosi <= '1';
@@ -173,171 +179,237 @@ begin
                             --next_state <= s_GEN_ADJ_SIGNALS;
                             state <= s_GEN_ADJ_SIGNALS;
                         end if;
+                    
                     when s_FAST_CLK_1  =>
-                    --if (count_clk2 = 16) then
-                    if (count = 5) then
-                        --next_state <= s_ONE_LAST_CYCLE;
-                        state <= s_FAST_CLK_2;
-                        s_Rd_DV_mosi <= '1';
-                    else
-                        --next_state <= s_GEN_ADJ_SIGNALS;
-                        state <= s_FAST_CLK_1;
-                    end if;
+                        --if (count_clk2 = 16) then
+                        if (count < COUNT_MAX) then
+                            s_Rd_DV_mosi <= '0';
+                        elsif (count = COUNT_MAX) then
+                            --next_state <= s_ONE_LAST_CYCLE;
+                            state <= s_FAST_CLK_2;
+                            s_Rd_DV_mosi <= '1';
+                        else
+                            --next_state <= s_GEN_ADJ_SIGNALS;
+                            state <= s_FAST_CLK_1;
+                        end if;
 
                     when s_FAST_CLK_2  =>
-                    --if (count_clk2 = 16) then
-                    if (count = 5) then
-                        --next_state <= s_ONE_LAST_CYCLE;
-                        state <= s_FAST_CLK_3;
-                        s_Rd_DV_mosi <= '1';
-                    else
-                        --next_state <= s_GEN_ADJ_SIGNALS;
-                        state <= s_FAST_CLK_2;
-                    end if;
+                        --if (count_clk2 = 16) then
+                        if (count < COUNT_MAX) then
+                            s_Rd_DV_mosi <= '0';
+                        elsif (count = COUNT_MAX) then
+                            --next_state <= s_ONE_LAST_CYCLE;
+                            state <= s_FAST_CLK_3;
+                            s_Rd_DV_mosi <= '1';
+                        else
+                            --next_state <= s_GEN_ADJ_SIGNALS;
+                            state <= s_FAST_CLK_2;
+                        end if;
+                    
                     when s_FAST_CLK_3  =>
-                    --if (count_clk2 = 16) then
-                    if (count = 5) then
-                        --next_state <= s_ONE_LAST_CYCLE;
-                        state <= s_FAST_CLK_4;
-                        s_Rd_DV_mosi <= '1';
-                    else
-                        --next_state <= s_GEN_ADJ_SIGNALS;
-                        state <= s_FAST_CLK_3;
-                    end if;
+                        --if (count_clk2 = 16) then
+                        if (count < COUNT_MAX) then
+                            s_Rd_DV_mosi <= '0';
+                        elsif (count = COUNT_MAX) then
+                            --next_state <= s_ONE_LAST_CYCLE;
+                            state <= s_FAST_CLK_4;
+                            s_Rd_DV_mosi <= '1';
+                        else
+                            --next_state <= s_GEN_ADJ_SIGNALS;
+                            state <= s_FAST_CLK_3;
+                        end if;
+                    
                     when s_FAST_CLK_4  =>
-                    --if (count_clk2 = 16) then
-                    if (count = 5) then
-                        --next_state <= s_ONE_LAST_CYCLE;
-                        state <= s_FAST_CLK_5;
-                        s_Rd_DV_mosi <= '1';
-                    else
-                        --next_state <= s_GEN_ADJ_SIGNALS;
-                        state <= s_FAST_CLK_4;
-                    end if;
+                        --if (count_clk2 = 16) then
+                        if (count < COUNT_MAX) then
+                            s_Rd_DV_mosi <= '0';
+                        elsif (count = COUNT_MAX) then
+                            --next_state <= s_ONE_LAST_CYCLE;
+                            state <= s_FAST_CLK_5;
+                            s_Rd_DV_mosi <= '1';
+                        else
+                            --next_state <= s_GEN_ADJ_SIGNALS;
+                            state <= s_FAST_CLK_4;
+                        end if;
+                    
                     when s_FAST_CLK_5  =>
-                    --if (count_clk2 = 16) then
-                    if (count = 5) then
-                        --next_state <= s_ONE_LAST_CYCLE;
-                        state <= s_FAST_CLK_6;
-                        s_Rd_DV_mosi <= '1';
-                    else
-                        --next_state <= s_GEN_ADJ_SIGNALS;
-                        state <= s_FAST_CLK_5;
-                    end if;
+                        --if (count_clk2 = 16) then
+                        if (count < COUNT_MAX) then
+                            s_Rd_DV_mosi <= '0';
+                        elsif (count = COUNT_MAX) then
+                            --next_state <= s_ONE_LAST_CYCLE;
+                            state <= s_FAST_CLK_6;
+                            s_Rd_DV_mosi <= '1';
+                        else
+                            --next_state <= s_GEN_ADJ_SIGNALS;
+                            state <= s_FAST_CLK_5;
+                        end if;
+                    
                     when s_FAST_CLK_6  =>
-                    --if (count_clk2 = 16) then
-                    if (count = 5) then
-                        --next_state <= s_ONE_LAST_CYCLE;
-                        state <= s_FAST_CLK_7;
-                        s_Rd_DV_mosi <= '1';
-                    else
-                        --next_state <= s_GEN_ADJ_SIGNALS;
-                        state <= s_FAST_CLK_6;
-                    end if;
+                        --if (count_clk2 = 16) then
+                        if (count < COUNT_MAX) then
+                            s_Rd_DV_mosi <= '0';
+                        elsif (count = COUNT_MAX) then
+                            --next_state <= s_ONE_LAST_CYCLE;
+                            state <= s_FAST_CLK_7;
+                            s_Rd_DV_mosi <= '1';
+                        else
+                            --next_state <= s_GEN_ADJ_SIGNALS;
+                            state <= s_FAST_CLK_6;
+                        end if;
+                    
                     when s_FAST_CLK_7  =>
-                    --if (count_clk2 = 16) then
-                    if (count = 5) then
-                        --next_state <= s_ONE_LAST_CYCLE;
-                        state <= s_FAST_CLK_8;
-                        s_Rd_DV_mosi <= '1';
-                    else
-                        --next_state <= s_GEN_ADJ_SIGNALS;
-                        state <= s_FAST_CLK_7;
-                    end if;
+                        --if (count_clk2 = 16) then
+                        if (count < COUNT_MAX) then
+                            s_Rd_DV_mosi <= '0';
+                        elsif (count = COUNT_MAX) then
+                            --next_state <= s_ONE_LAST_CYCLE;
+                            state <= s_FAST_CLK_8;
+                            s_Rd_DV_mosi <= '1';
+                        else
+                            --next_state <= s_GEN_ADJ_SIGNALS;
+                            state <= s_FAST_CLK_7;
+                        end if;
+                    
                     when s_FAST_CLK_8  =>
-                    --if (count_clk2 = 16) then
-                    if (count = 5) then
-                        --next_state <= s_ONE_LAST_CYCLE;
-                        state <= s_FAST_CLK_9;
-                        s_Rd_DV_mosi <= '1';
-                    else
-                        --next_state <= s_GEN_ADJ_SIGNALS;
-                        state <= s_FAST_CLK_8;
-                    end if;
+                        --if (count_clk2 = 16) then
+                        if (count < COUNT_MAX) then
+                            s_Rd_DV_mosi <= '0';
+                            miso_start_flag <= '0';
+                        elsif (count = COUNT_MAX) then
+                            --next_state <= s_ONE_LAST_CYCLE;
+                            state <= s_FAST_CLK_9;
+                            s_Rd_DV_mosi <= '1';
+                            miso_start_flag <= '1';
+                        else
+                            --next_state <= s_GEN_ADJ_SIGNALS;
+                            state <= s_FAST_CLK_8;
+                        end if;
+                        
                     when s_FAST_CLK_9  =>
-                    --if (count_clk2 = 16) then
-                    if (count = 5) then
-                        --next_state <= s_ONE_LAST_CYCLE;
-                        state <= s_FAST_CLK_10;
-                        s_Rd_DV_mosi <= '1';
-                    else
-                        --next_state <= s_GEN_ADJ_SIGNALS;
-                        state <= s_FAST_CLK_9;
-                    end if;
+                        --if (count_clk2 = 16) then
+                        if (count < COUNT_MAX) then
+                            s_Rd_DV_mosi <= '0';
+                            miso_start_flag <= '0';
+                        elsif (count = COUNT_MAX) then
+                            --next_state <= s_ONE_LAST_CYCLE;
+                            state <= s_FAST_CLK_10;
+                            s_Rd_DV_mosi <= '1';
+                            miso_start_flag <= '1';
+                        else
+                            --next_state <= s_GEN_ADJ_SIGNALS;
+                            state <= s_FAST_CLK_9;
+                        end if;
+                    
                     when s_FAST_CLK_10  =>
-                    --if (count_clk2 = 16) then
-                    if (count = 5) then
-                        --next_state <= s_ONE_LAST_CYCLE;
-                        state <= s_FAST_CLK_11;
-                        s_Rd_DV_mosi <= '1';
-                    else
-                        --next_state <= s_GEN_ADJ_SIGNALS;
-                        state <= s_FAST_CLK_10;
-                    end if;
+                        --if (count_clk2 = 16) then
+                        if (count < COUNT_MAX) then
+                            s_Rd_DV_mosi <= '0';
+                            miso_start_flag <= '0';
+                        elsif (count = COUNT_MAX) then
+                            --next_state <= s_ONE_LAST_CYCLE;
+                            state <= s_FAST_CLK_11;
+                            s_Rd_DV_mosi <= '1';
+                            miso_start_flag <= '1';
+                        else
+                            --next_state <= s_GEN_ADJ_SIGNALS;
+                            state <= s_FAST_CLK_10;
+                        end if;
+                    
                     when s_FAST_CLK_11  =>
-                    --if (count_clk2 = 16) then
-                    if (count = 5) then
-                        --next_state <= s_ONE_LAST_CYCLE;
-                        state <= s_FAST_CLK_12;
-                        s_Rd_DV_mosi <= '1';
-                    else
-                        --next_state <= s_GEN_ADJ_SIGNALS;
-                        state <= s_FAST_CLK_11;
-                    end if;
+                        --if (count_clk2 = 16) then
+                        if (count < COUNT_MAX) then
+                            s_Rd_DV_mosi <= '0';
+                            miso_start_flag <= '0';
+                        elsif (count = COUNT_MAX) then
+                            --next_state <= s_ONE_LAST_CYCLE;
+                            state <= s_FAST_CLK_12;
+                            s_Rd_DV_mosi <= '1';
+                            miso_start_flag <= '1';
+                        else
+                            --next_state <= s_GEN_ADJ_SIGNALS;
+                            state <= s_FAST_CLK_11;
+                        end if;
+                        
                     when s_FAST_CLK_12  =>
-                    --if (count_clk2 = 16) then
-                    if (count = 5) then
-                        --next_state <= s_ONE_LAST_CYCLE;
-                        state <= s_FAST_CLK_13;
-                        s_Rd_DV_mosi <= '1';
-                    else
-                        --next_state <= s_GEN_ADJ_SIGNALS;
-                        state <= s_FAST_CLK_12;
-                    end if;
+                        --if (count_clk2 = 16) then
+                        if (count < COUNT_MAX) then
+                            s_Rd_DV_mosi <= '0';
+                            miso_start_flag <= '0';
+                        elsif (count = COUNT_MAX) then
+                            --next_state <= s_ONE_LAST_CYCLE;
+                            state <= s_FAST_CLK_13;
+                            s_Rd_DV_mosi <= '1';
+                            miso_start_flag <= '1';
+                        else
+                            --next_state <= s_GEN_ADJ_SIGNALS;
+                            state <= s_FAST_CLK_12;
+                        end if;
+                    
                     when s_FAST_CLK_13  =>
-                    --if (count_clk2 = 16) then
-                    if (count = 5) then
-                        --next_state <= s_ONE_LAST_CYCLE;
-                        state <= s_FAST_CLK_14;
-                        s_Rd_DV_mosi <= '1';
-                    else
-                        --next_state <= s_GEN_ADJ_SIGNALS;
-                        state <= s_FAST_CLK_13;
-                    end if;
+                        --if (count_clk2 = 16) then
+                        if (count < COUNT_MAX) then
+                            s_Rd_DV_mosi <= '0';
+                            miso_start_flag <= '0';
+                        elsif (count = COUNT_MAX) then
+                            --next_state <= s_ONE_LAST_CYCLE;
+                            state <= s_FAST_CLK_14;
+                            s_Rd_DV_mosi <= '1';
+                            miso_start_flag <= '1';
+                        else
+                            --next_state <= s_GEN_ADJ_SIGNALS;
+                            state <= s_FAST_CLK_13;
+                        end if;
+                        
                     when s_FAST_CLK_14  =>
-                    --if (count_clk2 = 16) then
-                    if (count = 5) then
-                        --next_state <= s_ONE_LAST_CYCLE;
-                        state <= s_FAST_CLK_15;
-                        s_Rd_DV_mosi <= '1';
-                    else
-                        --next_state <= s_GEN_ADJ_SIGNALS;
-                        state <= s_FAST_CLK_14;
-                    end if;
+                        --if (count_clk2 = 16) then
+                        if (count < COUNT_MAX) then
+                            s_Rd_DV_mosi <= '0';
+                            miso_start_flag <= '0';
+                        elsif (count = COUNT_MAX) then
+                            --next_state <= s_ONE_LAST_CYCLE;
+                            state <= s_FAST_CLK_15;
+                            s_Rd_DV_mosi <= '1';
+                            miso_start_flag <= '1';
+                        else
+                            --next_state <= s_GEN_ADJ_SIGNALS;
+                            state <= s_FAST_CLK_14;
+                        end if;
+                    
                     when s_FAST_CLK_15  =>
-                    --if (count_clk2 = 16) then
-                    if (count = 5) then
-                        --next_state <= s_ONE_LAST_CYCLE;
-                        state <= s_FAST_CLK_16;
-                        s_Rd_DV_mosi <= '1';
-                    else
-                        --next_state <= s_GEN_ADJ_SIGNALS;
-                        state <= s_FAST_CLK_15;
-                    end if;
+                        --if (count_clk2 = 16) then
+                        if (count < COUNT_MAX) then
+                            s_Rd_DV_mosi <= '0';
+                            miso_start_flag <= '0';
+                        elsif (count = COUNT_MAX) then
+                            --next_state <= s_ONE_LAST_CYCLE;
+                            state <= s_FAST_CLK_16;
+                            s_Rd_DV_mosi <= '1';
+                            miso_start_flag <= '1';
+                        else
+                            --next_state <= s_GEN_ADJ_SIGNALS;
+                            state <= s_FAST_CLK_15;
+                        end if;
+                    
                     when s_FAST_CLK_16  =>
-                    --if (count_clk2 = 16) then
-                    if (count = 5) then
-                        --next_state <= s_ONE_LAST_CYCLE;
-                        state <= s_ONE_LAST_CYCLE;
-                        s_Rd_DV_mosi <= '1';
-                    else
-                        --next_state <= s_GEN_ADJ_SIGNALS;
-                        state <= s_FAST_CLK_16;
-                    end if;
+                        --if (count_clk2 = 16) then
+                        if (count < COUNT_MAX) then
+                            s_Rd_DV_mosi <= '0';
+                            miso_start_flag <= '0';
+                        elsif (count = COUNT_MAX) then
+                            --next_state <= s_ONE_LAST_CYCLE;
+                            state <= s_IDLE;
+                            s_Rd_DV_mosi <= '0';
+                            miso_start_flag <= '0';
+                            start_clk2 <= '0';
+                        else
+                            --next_state <= s_GEN_ADJ_SIGNALS;
+                            state <= s_FAST_CLK_16;
+                        end if;
                                     
                     when s_ONE_LAST_CYCLE =>
                         --if (count_clk2 = 17) then
-                        if (count = 5) then
+                        if (count = COUNT_MAX) then
                             --next_state <= s_IDLE;
                             state <= s_IDLE;
                             start_clk2 <= '0';
@@ -354,6 +426,11 @@ begin
                         s_Wr_DV_mosi <= '0';
                         s_Rd_DV_mosi <= '0';
                 end case;
+            
+            ---------------------------------------------------------------------------------------------
+            --------------------------------------- State for Write -------------------------------------
+            ---------------------------------------------------------------------------------------------
+
             else
                 case state is
                     when s_IDLE =>
@@ -370,14 +447,226 @@ begin
 
                     when s_GEN_ADJ_SIGNALS  =>
                         --if (count_clk2 = 16) then
-                        if (count = 32) then
-                            --next_state <= s_ONE_LAST_CYCLE;
-                            state <= s_ONE_LAST_CYCLE;
+                        if (count < COUNT_MAX) then
                             s_Rd_DV_mosi <= '0';
+                        elsif (count = COUNT_MAX) then
+                            --next_state <= s_ONE_LAST_CYCLE;
+                            state <= s_FAST_CLK_1;
+                            s_Rd_DV_mosi <= '1';
                         else
                             --next_state <= s_GEN_ADJ_SIGNALS;
                             state <= s_GEN_ADJ_SIGNALS;
                         end if;
+                    
+                    when s_FAST_CLK_1  =>
+                        --if (count_clk2 = 16) then
+                        if (count < COUNT_MAX) then
+                            s_Rd_DV_mosi <= '0';
+                        elsif (count = COUNT_MAX) then
+                            --next_state <= s_ONE_LAST_CYCLE;
+                            state <= s_FAST_CLK_2;
+                            s_Rd_DV_mosi <= '1';
+                        else
+                            --next_state <= s_GEN_ADJ_SIGNALS;
+                            state <= s_FAST_CLK_1;
+                        end if;
+
+                    when s_FAST_CLK_2  =>
+                        --if (count_clk2 = 16) then
+                        if (count < COUNT_MAX) then
+                            s_Rd_DV_mosi <= '0';
+                        elsif (count = COUNT_MAX) then
+                            --next_state <= s_ONE_LAST_CYCLE;
+                            state <= s_FAST_CLK_3;
+                            s_Rd_DV_mosi <= '1';
+                        else
+                            --next_state <= s_GEN_ADJ_SIGNALS;
+                            state <= s_FAST_CLK_2;
+                        end if;
+                    
+                    when s_FAST_CLK_3  =>
+                        --if (count_clk2 = 16) then
+                        if (count < COUNT_MAX) then
+                            s_Rd_DV_mosi <= '0';
+                        elsif (count = COUNT_MAX) then
+                            --next_state <= s_ONE_LAST_CYCLE;
+                            state <= s_FAST_CLK_4;
+                            s_Rd_DV_mosi <= '1';
+                        else
+                            --next_state <= s_GEN_ADJ_SIGNALS;
+                            state <= s_FAST_CLK_3;
+                        end if;
+                    
+                    when s_FAST_CLK_4  =>
+                        --if (count_clk2 = 16) then
+                        if (count < COUNT_MAX) then
+                            s_Rd_DV_mosi <= '0';
+                        elsif (count = COUNT_MAX) then
+                            --next_state <= s_ONE_LAST_CYCLE;
+                            state <= s_FAST_CLK_5;
+                            s_Rd_DV_mosi <= '1';
+                        else
+                            --next_state <= s_GEN_ADJ_SIGNALS;
+                            state <= s_FAST_CLK_4;
+                        end if;
+                    
+                    when s_FAST_CLK_5  =>
+                        --if (count_clk2 = 16) then
+                        if (count < COUNT_MAX) then
+                            s_Rd_DV_mosi <= '0';
+                        elsif (count = COUNT_MAX) then
+                            --next_state <= s_ONE_LAST_CYCLE;
+                            state <= s_FAST_CLK_6;
+                            s_Rd_DV_mosi <= '1';
+                        else
+                            --next_state <= s_GEN_ADJ_SIGNALS;
+                            state <= s_FAST_CLK_5;
+                        end if;
+                    
+                    when s_FAST_CLK_6  =>
+                        --if (count_clk2 = 16) then
+                        if (count < COUNT_MAX) then
+                            s_Rd_DV_mosi <= '0';
+                        elsif (count = COUNT_MAX) then
+                            --next_state <= s_ONE_LAST_CYCLE;
+                            state <= s_FAST_CLK_7;
+                            s_Rd_DV_mosi <= '1';
+                        else
+                            --next_state <= s_GEN_ADJ_SIGNALS;
+                            state <= s_FAST_CLK_6;
+                        end if;
+                    
+                    when s_FAST_CLK_7  =>
+                        --if (count_clk2 = 16) then
+                        if (count < COUNT_MAX) then
+                            s_Rd_DV_mosi <= '0';
+                        elsif (count = COUNT_MAX) then
+                            --next_state <= s_ONE_LAST_CYCLE;
+                            state <= s_FAST_CLK_8;
+                            s_Rd_DV_mosi <= '1';
+                        else
+                            --next_state <= s_GEN_ADJ_SIGNALS;
+                            state <= s_FAST_CLK_7;
+                        end if;
+                    
+                    when s_FAST_CLK_8  =>
+                        --if (count_clk2 = 16) then
+                        if (count < COUNT_MAX) then
+                            s_Rd_DV_mosi <= '0';
+                        elsif (count = COUNT_MAX) then
+                            --next_state <= s_ONE_LAST_CYCLE;
+                            state <= s_FAST_CLK_9;
+                            s_Rd_DV_mosi <= '1';
+                        else
+                            --next_state <= s_GEN_ADJ_SIGNALS;
+                            state <= s_FAST_CLK_8;
+                        end if;
+                    
+                        when s_FAST_CLK_9  =>
+                        --if (count_clk2 = 16) then
+                        if (count < COUNT_MAX) then
+                            s_Rd_DV_mosi <= '0';
+                        elsif (count = COUNT_MAX) then
+                            --next_state <= s_ONE_LAST_CYCLE;
+                            state <= s_FAST_CLK_10;
+                            s_Rd_DV_mosi <= '1';
+                        else
+                            --next_state <= s_GEN_ADJ_SIGNALS;
+                            state <= s_FAST_CLK_9;
+                        end if;
+                    
+                    when s_FAST_CLK_10  =>
+                        --if (count_clk2 = 16) then
+                        if (count < COUNT_MAX) then
+                            s_Rd_DV_mosi <= '0';
+                        elsif (count = COUNT_MAX) then
+                            --next_state <= s_ONE_LAST_CYCLE;
+                            state <= s_FAST_CLK_11;
+                            s_Rd_DV_mosi <= '1';
+                        else
+                            --next_state <= s_GEN_ADJ_SIGNALS;
+                            state <= s_FAST_CLK_10;
+                        end if;
+                    
+                    when s_FAST_CLK_11  =>
+                        --if (count_clk2 = 16) then
+                        if (count < COUNT_MAX) then
+                            s_Rd_DV_mosi <= '0';
+                        elsif (count = COUNT_MAX) then
+                            --next_state <= s_ONE_LAST_CYCLE;
+                            state <= s_FAST_CLK_12;
+                            s_Rd_DV_mosi <= '1';
+                        else
+                            --next_state <= s_GEN_ADJ_SIGNALS;
+                            state <= s_FAST_CLK_11;
+                        end if;
+                        
+                    when s_FAST_CLK_12  =>
+                        --if (count_clk2 = 16) then
+                        if (count < COUNT_MAX) then
+                            s_Rd_DV_mosi <= '0';
+                        elsif (count = COUNT_MAX) then
+                            --next_state <= s_ONE_LAST_CYCLE;
+                            state <= s_FAST_CLK_13;
+                            s_Rd_DV_mosi <= '1';
+                        else
+                            --next_state <= s_GEN_ADJ_SIGNALS;
+                            state <= s_FAST_CLK_12;
+                        end if;
+                    
+                    when s_FAST_CLK_13  =>
+                        --if (count_clk2 = 16) then
+                        if (count < COUNT_MAX) then
+                            s_Rd_DV_mosi <= '0';
+                        elsif (count = COUNT_MAX) then
+                            --next_state <= s_ONE_LAST_CYCLE;
+                            state <= s_FAST_CLK_14;
+                            s_Rd_DV_mosi <= '1';
+                        else
+                            --next_state <= s_GEN_ADJ_SIGNALS;
+                            state <= s_FAST_CLK_13;
+                        end if;
+                        
+                    when s_FAST_CLK_14  =>
+                        --if (count_clk2 = 16) then
+                        if (count < COUNT_MAX) then
+                            s_Rd_DV_mosi <= '0';
+                        elsif (count = COUNT_MAX) then
+                            --next_state <= s_ONE_LAST_CYCLE;
+                            state <= s_FAST_CLK_15;
+                            s_Rd_DV_mosi <= '1';
+                        else
+                            --next_state <= s_GEN_ADJ_SIGNALS;
+                            state <= s_FAST_CLK_14;
+                        end if;
+                    
+                    when s_FAST_CLK_15  =>
+                        --if (count_clk2 = 16) then
+                        if (count < COUNT_MAX) then
+                            s_Rd_DV_mosi <= '0';
+                        elsif (count = COUNT_MAX) then
+                            --next_state <= s_ONE_LAST_CYCLE;
+                            state <= s_FAST_CLK_16;
+                            s_Rd_DV_mosi <= '1';
+                        else
+                            --next_state <= s_GEN_ADJ_SIGNALS;
+                            state <= s_FAST_CLK_15;
+                        end if;
+                    
+                    when s_FAST_CLK_16  =>
+                        --if (count_clk2 = 16) then
+                        if (count < COUNT_MAX) then
+                            s_Rd_DV_mosi <= '0';
+                        elsif (count = COUNT_MAX) then
+                            --next_state <= s_ONE_LAST_CYCLE;
+                            state <= s_IDLE;
+                            s_Rd_DV_mosi <= '1';
+                            start_clk2 <= '0';
+                        else
+                            --next_state <= s_GEN_ADJ_SIGNALS;
+                            state <= s_FAST_CLK_16;
+                        end if;
+
                     when s_ONE_LAST_CYCLE =>
                         --if (count_clk2 = 17) then
                         if (count = 33) then
@@ -409,6 +698,11 @@ begin
             s_Wr_DV_miso <= '0';
             s_Rd_DV_miso <= '0';
         else
+
+            ---------------------------------------------------------------------------------------------
+            --------------------------------------- State for Read --------------------------------------
+            ---------------------------------------------------------------------------------------------
+
             if (cmd_write = '0') then
                 case state_miso is
                     when s_IDLE_miso => 
@@ -453,6 +747,23 @@ begin
 
 end process;
 
+process (clk)
+begin
+    if start_clk2 = '1' then
+        if rising_edge(clk) then
+            if count_to_gen_clk2 = 1 then
+                count_to_gen_clk2 <= 0;
+                clk2 <= not clk2;
+            else
+                count_to_gen_clk2 <= count_to_gen_clk2 + 1;
+                
+            end if;
+        end if;
+    else
+        clk2 <= '0';
+    end if;
+end process;
+
 
 
 process (spi_clk)
@@ -479,8 +790,8 @@ s_miso(0) <= miso;
 a_miso <= s_a_miso(0);
 a_mosi <= s_a_mosi(0);
 a_ss_n <= start_clk2;
-miso_start_flag <= '1' when (count > 15 and count < 32) else '0';
+--miso_start_flag <= '1' when (count > 15 and count < 32) else '0';
 s_Wr_En <= miso_start_flag;
-count_rst <= '1' when count = 5 else '0';
+count_rst <= '1' when count = COUNT_MAX else '0';
 
 end Behavioral;
