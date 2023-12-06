@@ -90,7 +90,7 @@ p_write:  process (i_wClk, i_Rst_L) is
     if (i_Rst_L = '0') then
         s_Wr_Addr <= "0000";
         r_Count   <= 0;
-    elsif rising_edge(i_wClk) then     
+    elsif falling_edge(i_wClk) then     
             -- Write
             if (i_Wr_DV = '1') then   -- ss_n is high i.e chip select is active
                 if (wr_count = DEPTH - 1) then

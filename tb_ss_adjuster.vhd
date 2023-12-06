@@ -213,7 +213,12 @@ begin
     s_spi_clk <= '1';
     wait for 320 ns;
     s_spi_clk <= '0';
-    wait for 1000 ns;
+    wait for 320 ns;
+
+    s_ss_n <= '0';
+    wait for 200 ns;
+    s_ss_n <= '1';
+    wait for 480 ns;
     
     ------------------------------------------------------------------------------------
     -------------------------------- Second Transcation --------------------------------
@@ -362,7 +367,7 @@ begin
     wait for 640 ns;
     
     -- A6 bit
-    s_mosi <= '1';
+    s_mosi <= '0';
     wait for 640 ns;
     
     -- A5 bit
@@ -370,7 +375,7 @@ begin
     wait for 640 ns;
     
     -- A4 bit
-    s_mosi <= '1';
+    s_mosi <= '0';
     wait for 640 ns;
     
     -- A3 bit
@@ -378,7 +383,7 @@ begin
     wait for 640 ns;
     
     -- A2 bit
-    s_mosi <= '1';
+    s_mosi <= '0';
     wait for 640 ns;
     
     -- A1 bit
