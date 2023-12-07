@@ -64,7 +64,7 @@ signal s_a_ss_n : std_logic := '0';
 signal s_a_spi_clk : std_logic := '0';
 signal s_a_mosi : std_logic := '0';
 signal s_a_miso : std_logic := '0';
-signal test : std_logic := '0';
+signal test, s_test_ss_n : std_logic := '0';
 
 
 constant spi_clk_period : time := 160 ns;
@@ -96,232 +96,37 @@ begin
     wait for clk_period/2;
 end process;
 
-process 
-begin
-    for i in 1 to 16 loop
-        test <= '0';
-        wait for 20 ns;
-        test <= '1';
-        wait for 20 ns;
-    end loop; -- spi_clk_loop
-        wait;
-end process;
-
-process
+spi_clk_gen: process 
 begin
     s_rst <= '0';
     wait for 35 ns;
     s_rst <= '1';
     wait for 45 ns;
-    
-    -- set the ss_n to high
     s_ss_n <= '1';
     wait for 1000 ns;
-    
-    -- starting the spi_clk of 6.25 MHz. Hence toggling every 80 ns.
-    -- 1st rising edge
-    s_spi_clk <= '1';
-    wait for 320 ns;
-    s_spi_clk <= '0';
-    wait for 320 ns;
-    
-    -- 2nd rising edge
-    s_spi_clk <= '1';
-    wait for 320 ns;
-    s_spi_clk <= '0';
-    wait for 320 ns;
-    
-    -- 3rd rising edge
-    s_spi_clk <= '1';
-    wait for 320 ns;
-    s_spi_clk <= '0';
-    wait for 320 ns;
-    
-    -- 4th rising edge
-    s_spi_clk <= '1';
-    wait for 320 ns;
-    s_spi_clk <= '0';
-    wait for 320 ns;
-    
-    -- 5th rising edge
-    s_spi_clk <= '1';
-    wait for 320 ns;
-    s_spi_clk <= '0';
-    wait for 320 ns;
-    
-    -- 6th rising edge
-    s_spi_clk <= '1';
-    wait for 320 ns;
-    s_spi_clk <= '0';
-    wait for 320 ns;
-    
-    -- 7th rising edge
-    s_spi_clk <= '1';
-    wait for 320 ns;
-    s_spi_clk <= '0';
-    wait for 320 ns;
-    
-    -- 8th rising edge
-    s_spi_clk <= '1';
-    wait for 320 ns;
-    s_spi_clk <= '0';
-    wait for 320 ns;
-    
-    -- 9th rising edge
-    s_spi_clk <= '1';
-    wait for 320 ns;
-    s_spi_clk <= '0';
-    wait for 320 ns;
-    
-    -- 10th rising edge
-    s_spi_clk <= '1';
-    wait for 320 ns;
-    s_spi_clk <= '0';
-    wait for 320 ns;
-    
-    -- 11th rising edge
-    s_spi_clk <= '1';
-    wait for 320 ns;
-    s_spi_clk <= '0';
-    wait for 320 ns;
-    
-    -- 12th rising edge
-    s_spi_clk <= '1';
-    wait for 320 ns;
-    s_spi_clk <= '0';
-    wait for 320 ns;
-    
-    -- 13th rising edge
-    s_spi_clk <= '1';
-    wait for 320 ns;
-    s_spi_clk <= '0';
-    wait for 320 ns;
-    
-    -- 14th rising edge
-    s_spi_clk <= '1';
-    wait for 320 ns;
-    s_spi_clk <= '0';
-    wait for 320 ns;
-    
-    -- 15th rising edge
-    s_spi_clk <= '1';
-    wait for 320 ns;
-    s_spi_clk <= '0';
-    wait for 320 ns;
-    
-    -- 16th rising edge
-    s_spi_clk <= '1';
-    wait for 320 ns;
-    s_spi_clk <= '0';
-    wait for 320 ns;
+
+    for i in 1 to 16 loop
+        s_spi_clk <= '1';
+        wait for 320 ns;
+        s_spi_clk <= '0';
+        wait for 320 ns;
+    end loop; -- spi_clk_loop
 
     s_ss_n <= '0';
     wait for 200 ns;
     s_ss_n <= '1';
     wait for 480 ns;
-    
-    ------------------------------------------------------------------------------------
-    -------------------------------- Second Transcation --------------------------------
-    ------------------------------------------------------------------------------------
 
-    s_spi_clk <= '1';
-    wait for 320 ns;
-    s_spi_clk <= '0';
-    wait for 320 ns;
-    
-    -- 2nd rising edge
-    s_spi_clk <= '1';
-    wait for 320 ns;
-    s_spi_clk <= '0';
-    wait for 320 ns;
-    
-    -- 3rd rising edge
-    s_spi_clk <= '1';
-    wait for 320 ns;
-    s_spi_clk <= '0';
-    wait for 320 ns;
-    
-    -- 4th rising edge
-    s_spi_clk <= '1';
-    wait for 320 ns;
-    s_spi_clk <= '0';
-    wait for 320 ns;
-    
-    -- 5th rising edge
-    s_spi_clk <= '1';
-    wait for 320 ns;
-    s_spi_clk <= '0';
-    wait for 320 ns;
-    
-    -- 6th rising edge
-    s_spi_clk <= '1';
-    wait for 320 ns;
-    s_spi_clk <= '0';
-    wait for 320 ns;
-    
-    -- 7th rising edge
-    s_spi_clk <= '1';
-    wait for 320 ns;
-    s_spi_clk <= '0';
-    wait for 320 ns;
-    
-    -- 8th rising edge
-    s_spi_clk <= '1';
-    wait for 320 ns;
-    s_spi_clk <= '0';
-    wait for 320 ns;
-    
-    -- 9th rising edge
-    s_spi_clk <= '1';
-    wait for 320 ns;
-    s_spi_clk <= '0';
-    wait for 320 ns;
-    
-    -- 10th rising edge
-    s_spi_clk <= '1';
-    wait for 320 ns;
-    s_spi_clk <= '0';
-    wait for 320 ns;
-    
-    -- 11th rising edge
-    s_spi_clk <= '1';
-    wait for 320 ns;
-    s_spi_clk <= '0';
-    wait for 320 ns;
-    
-    -- 12th rising edge
-    s_spi_clk <= '1';
-    wait for 320 ns;
-    s_spi_clk <= '0';
-    wait for 320 ns;
-    
-    -- 13th rising edge
-    s_spi_clk <= '1';
-    wait for 320 ns;
-    s_spi_clk <= '0';
-    wait for 320 ns;
-    
-    -- 14th rising edge
-    s_spi_clk <= '1';
-    wait for 320 ns;
-    s_spi_clk <= '0';
-    wait for 320 ns;
-    
-    -- 15th rising edge
-    s_spi_clk <= '1';
-    wait for 320 ns;
-    s_spi_clk <= '0';
-    wait for 320 ns;
-    
-    -- 16th rising edge
-    s_spi_clk <= '1';
-    wait for 320 ns;
-    s_spi_clk <= '0';
-    wait for 1660 ns;
+    for i in 1 to 16 loop
+        s_spi_clk <= '1';
+        wait for 320 ns;
+        s_spi_clk <= '0';
+        wait for 320 ns;
+    end loop; -- spi_clk_loop
+
     wait;
-
-
 end process;
+
 
 process
 begin
