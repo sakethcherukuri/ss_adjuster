@@ -61,7 +61,7 @@ signal state, next_state : t_state_mosi := s_IDLE;
 signal AF_Flag, AE_Flag, Full_flag, Empty_flag : std_logic := '0';
 -- Signals for setting the Data valid lines on the FIFO
 signal s_Wr_DV_mosi, s_Rd_DV_mosi : std_logic := '0';
-signal s_Wr_En, count_rst, count_spi_clk_rst : std_logic := '0';
+signal s_Wr_En, count_rst, count_spi_clk_rst, count_wr_en_rst : std_logic := '0';
 
 ------------------------- MOSI ----------------------------
 
@@ -77,7 +77,7 @@ signal s_Wr_DV_miso, s_Rd_DV_miso : std_logic := '0';
 ------------------------- MISO ----------------------------
 
 -- Signals that count
-signal count_clk2, count_spi_clk, count_to_gen_clk2, count : integer := 0;
+signal count_wr_en, count_spi_clk, count_to_gen_clk2, count : integer := 0;
 
 -- Write or Read control bit
 signal cmd_write : std_logic := '0';
@@ -100,8 +100,8 @@ MOSI_FIFO: entity xil_defaultlib.FIFO_ss
     )
     port map(
         i_Rst_L => rst,
-        i_wClk   => spi_clk,
-        i_Wr_DV    => ss_n,
+        i_wClk   => clk,
+        i_Wr_DV    => s_Wr_DV_mosi,
         i_Wr_Data  => s_mosi,
         i_AF_Level => 7,
         o_AF_Flag  => AF_Flag,
@@ -145,7 +145,7 @@ p_mosi: process (clk)
 begin
     if rising_edge(clk) then
         if rst = '0' then
-            s_Wr_DV_mosi <= '0';
+            --s_Wr_DV_mosi <= '0';
             s_Rd_DV_mosi <= '0';
             start_clk2 <= '0';
         else
@@ -377,7 +377,7 @@ begin
                         if (count = COUNT_MAX) then
                             state <= s_IDLE;
                             start_clk2 <= '0';
-                            s_Wr_DV_mosi <= '0';
+                            --s_Wr_DV_mosi <= '0';
                             s_Rd_DV_mosi <= '0';
                         else
                             state <= s_ONE_LAST_CYCLE;
@@ -385,7 +385,7 @@ begin
                     when others => 
                         state <= s_IDLE;
                         start_clk2 <= '0';
-                        s_Wr_DV_mosi <= '0';
+                        --s_Wr_DV_mosi <= '0';
                         s_Rd_DV_mosi <= '0';
                 end case;
             
@@ -592,7 +592,7 @@ begin
                             
                             state <= s_IDLE;
                             start_clk2 <= '0';
-                            s_Wr_DV_mosi <= '0';
+                            --s_Wr_DV_mosi <= '0';
                             s_Rd_DV_mosi <= '0';
                         else
                             
@@ -602,7 +602,7 @@ begin
                         
                         state <= s_IDLE;
                         start_clk2 <= '0';
-                        s_Wr_DV_mosi <= '0';
+                        --s_Wr_DV_mosi <= '0';
                         s_Rd_DV_mosi <= '0';
                 end case;
             end if;
@@ -660,8 +660,25 @@ begin
         else
             count <= count + 1;
         end if;
+
+        if count_wr_en_rst = '1' then
+            count_wr_en <= 0;
+        elsif  spi_clk = '1' and ss_n = '1' then
+            count_wr_en <= count_wr_en + 1;
+        end if;
     end if;
 
+end process;
+
+p_wr_en: process (clk)
+begin
+    if rising_edge(clk) then
+        if count_wr_en < 30 then
+            s_Wr_DV_mosi <= '0';
+        elsif count_wr_en = 31 then
+            s_Wr_DV_mosi <= '1';
+        end if;
+    end if;
 end process;
 
 process (clk)
@@ -717,5 +734,6 @@ a_ss_n <= start_clk2;
 s_Wr_En <= miso_start_flag;
 count_rst <= '1' when count = COUNT_MAX else '0';
 count_spi_clk_rst <= '1' when count_spi_clk = COUNT_SPI_MAX else '0';
+count_wr_en_rst <= '1' when count_wr_en = 31 else '0';
 
 end Behavioral;
