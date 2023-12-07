@@ -47,7 +47,7 @@ begin
   -- Purpose: Control Writes to Memory.
   process (i_Wr_Clk)
   begin
-    if rising_edge(i_Wr_Clk) then
+    if falling_edge(i_Wr_Clk) then
       if i_Wr_DV = '1' then
         r_Mem(to_integer(unsigned(i_Wr_Addr))) <= i_Wr_Data;
       end if;
@@ -57,7 +57,7 @@ begin
   -- Purpose: Control Reads From Memory.
   process (i_Rd_Clk)
   begin
-    if rising_edge(i_Rd_Clk) then
+    if falling_edge(i_Rd_Clk) then
       o_Rd_Data <= r_Mem(to_integer(unsigned(i_Rd_Addr)));
       o_Rd_DV   <= i_Rd_En;
     end if;

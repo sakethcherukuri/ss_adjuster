@@ -157,7 +157,7 @@ begin
             if (cmd_write = '0') then
                 case state is
                     when s_IDLE =>
-                        if (AF_Flag = '1' and count_spi_clk = 8) then
+                        if (AF_Flag = '1' and count_spi_clk = 8 and count = COUNT_MAX) then
                             state <= s_GEN_ADJ_SIGNALS;
                             start_clk2 <= '1';
                             s_Rd_DV_mosi <= '0';
@@ -396,7 +396,7 @@ begin
             else
                 case state is
                     when s_IDLE =>
-                        if (AF_Flag = '1' and count_spi_clk = 15) then
+                        if (AF_Flag = '1' and count_spi_clk = 15 and count = COUNT_MAX) then
                             state <= s_GEN_ADJ_SIGNALS;
                             start_clk2 <= '1';
                             s_Rd_DV_mosi <= '0';
