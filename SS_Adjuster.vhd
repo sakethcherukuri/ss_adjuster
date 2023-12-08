@@ -61,7 +61,7 @@ signal state, next_state : t_state_mosi := s_IDLE;
 signal AF_Flag, AE_Flag, Full_flag, Empty_flag : std_logic := '0';
 -- Signals for setting the Data valid lines on the FIFO
 signal s_Wr_DV_mosi, s_Rd_DV_mosi : std_logic := '0';
-signal s_Wr_En, count_rst, count_spi_clk_rst, count_wr_en_rst : std_logic := '0';
+signal s_Wr_En, count_rst, count_spi_clk_rst,count_rst_wr_en : std_logic := '0';
 
 ------------------------- MOSI ----------------------------
 
@@ -77,7 +77,7 @@ signal s_Wr_DV_miso, s_Rd_DV_miso : std_logic := '0';
 ------------------------- MISO ----------------------------
 
 -- Signals that count
-signal count_wr_en, count_spi_clk, count_to_gen_clk2, count : integer := 0;
+signal count_for_wr_rn, count_spi_clk, count_to_gen_clk2, count : integer := 0;
 
 -- Write or Read control bit
 signal cmd_write : std_logic := '0';
@@ -100,8 +100,8 @@ MOSI_FIFO: entity xil_defaultlib.FIFO_ss
     )
     port map(
         i_Rst_L => rst,
-        i_wClk   => clk,
-        i_Wr_DV    => s_Wr_DV_mosi,
+        i_wClk   => spi_clk,
+        i_Wr_DV    => ss_n,
         i_Wr_Data  => s_mosi,
         i_AF_Level => 7,
         o_AF_Flag  => AF_Flag,
@@ -117,7 +117,7 @@ MOSI_FIFO: entity xil_defaultlib.FIFO_ss
         o_Empty   =>  Empty_flag
     );
 
-MISO_FIFO: entity xil_defaultlib.FIFO_ss
+MISO_FIFO: entity xil_defaultlib.FIFO_test
     generic map (
         WIDTH => g_WIDTH,
         DEPTH => 8
@@ -141,11 +141,24 @@ MISO_FIFO: entity xil_defaultlib.FIFO_ss
         o_Empty   =>  Empty_flag
     );
 
+mosi_wr_en: process (clk)
+begin
+    if rising_edge(clk) then
+        if (spi_clk = '1' and count_for_wr_rn < 32) then
+            s_Wr_DV_mosi <= '0';
+        elsif (spi_clk = '1' and count_for_wr_rn = 33) then
+            s_Wr_DV_mosi <= '1';
+        else
+            s_Wr_DV_mosi <= '0';
+        end if;
+    end if;
+end process;
+
 p_mosi: process (clk)
 begin
     if rising_edge(clk) then
         if rst = '0' then
-            --s_Wr_DV_mosi <= '0';
+            s_Wr_DV_mosi <= '0';
             s_Rd_DV_mosi <= '0';
             start_clk2 <= '0';
         else
@@ -168,177 +181,208 @@ begin
                         end if;
 
                     when s_GEN_ADJ_SIGNALS  =>
-                        if (count < COUNT_MAX) then
+                        if (count < COUNT_MAX - 1) then
                             s_Rd_DV_mosi <= '0';
+                        elsif count = COUNT_MAX - 1 then
+                            s_Rd_DV_mosi <= '1';
                         elsif (count = COUNT_MAX) then
                             
                             state <= s_FAST_CLK_1;
-                            s_Rd_DV_mosi <= '1';
+                            s_Rd_DV_mosi <= '0';
                         else
                             state <= s_GEN_ADJ_SIGNALS;
                         end if;
                     
                     when s_FAST_CLK_1  =>
-                        if (count < COUNT_MAX) then
+                        if (count < COUNT_MAX - 1) then
                             s_Rd_DV_mosi <= '0';
+                        elsif count = COUNT_MAX - 1 then
+                            s_Rd_DV_mosi <= '1';
                         elsif (count = COUNT_MAX) then
                             
                             state <= s_FAST_CLK_2;
-                            s_Rd_DV_mosi <= '1';
+                            s_Rd_DV_mosi <= '0';
                         else
                             state <= s_FAST_CLK_1;
                         end if;
 
                     when s_FAST_CLK_2  =>
-                        if (count < COUNT_MAX) then
+                        if (count < COUNT_MAX - 1) then
                             s_Rd_DV_mosi <= '0';
+                        elsif count = COUNT_MAX - 1 then
+                            s_Rd_DV_mosi <= '1';
                         elsif (count = COUNT_MAX) then
                             
                             state <= s_FAST_CLK_3;
-                            s_Rd_DV_mosi <= '1';
+                            s_Rd_DV_mosi <= '0';
                         else
                             state <= s_FAST_CLK_2;
                         end if;
                     
                     when s_FAST_CLK_3  =>
-                        if (count < COUNT_MAX) then
+                        if (count < COUNT_MAX - 1) then
                             s_Rd_DV_mosi <= '0';
+                        elsif count = COUNT_MAX - 1 then
+                            s_Rd_DV_mosi <= '1';
                         elsif (count = COUNT_MAX) then
                             
                             state <= s_FAST_CLK_4;
-                            s_Rd_DV_mosi <= '1';
+                            s_Rd_DV_mosi <= '0';
                         else
                             state <= s_FAST_CLK_3;
                         end if;
                     
                     when s_FAST_CLK_4  =>
-                        if (count < COUNT_MAX) then
+                        if (count < COUNT_MAX - 1) then
                             s_Rd_DV_mosi <= '0';
+                        elsif count = COUNT_MAX - 1 then
+                            s_Rd_DV_mosi <= '1';
                         elsif (count = COUNT_MAX) then
                             
                             state <= s_FAST_CLK_5;
-                            s_Rd_DV_mosi <= '1';
+                            s_Rd_DV_mosi <= '0';
                         else
                             state <= s_FAST_CLK_4;
                         end if;
                     
                     when s_FAST_CLK_5  =>
-                        if (count < COUNT_MAX) then
+                        if (count < COUNT_MAX - 1) then
                             s_Rd_DV_mosi <= '0';
-                        elsif (count = COUNT_MAX) then
-                            
-                            state <= s_FAST_CLK_6;
+                        elsif count = COUNT_MAX - 1 then
                             s_Rd_DV_mosi <= '1';
+                        elsif (count = COUNT_MAX) then
+                            state <= s_FAST_CLK_6;
+                            s_Rd_DV_mosi <= '0';
                         else
                             state <= s_FAST_CLK_5;
                         end if;
                     
                     when s_FAST_CLK_6  =>
-                        if (count < COUNT_MAX) then
+                        if (count < COUNT_MAX - 1) then
                             s_Rd_DV_mosi <= '0';
-                        elsif (count = COUNT_MAX) then
-                            
-                            state <= s_FAST_CLK_7;
+                        elsif count = COUNT_MAX - 1 then
                             s_Rd_DV_mosi <= '1';
+                        elsif (count = COUNT_MAX) then
+                            state <= s_FAST_CLK_7;
+                            s_Rd_DV_mosi <= '0';
                         else
                             state <= s_FAST_CLK_6;
                         end if;
                     
                     when s_FAST_CLK_7  =>
-                        if (count < COUNT_MAX) then
+                        if (count < COUNT_MAX - 1) then
                             s_Rd_DV_mosi <= '0';
-                        elsif (count = COUNT_MAX) then
-                            
-                            state <= s_FAST_CLK_8;
+                        elsif count = COUNT_MAX - 1 then
                             s_Rd_DV_mosi <= '1';
+                        elsif (count = COUNT_MAX) then
+                            state <= s_FAST_CLK_8;
+                            s_Rd_DV_mosi <= '0';
                         else
                             state <= s_FAST_CLK_7;
                         end if;
                     
                     when s_FAST_CLK_8  =>
-                        if (count < COUNT_MAX) then
+                        if (count = 0) then
+                            s_Rd_DV_mosi <= '0';
+                            miso_start_flag <= '1';
+                        elsif (count = 1) then
                             s_Rd_DV_mosi <= '0';
                             miso_start_flag <= '0';
-                        elsif (count = COUNT_MAX) then
-                            
-                            state <= s_FAST_CLK_9;
+                        elsif (count = 2) then
                             s_Rd_DV_mosi <= '1';
-                            miso_start_flag <= '1';
+                            miso_start_flag <= '0';
+                        elsif (count = COUNT_MAX) then
+                                state <= s_FAST_CLK_9;
+                                s_Rd_DV_mosi <= '0';
+                                miso_start_flag <= '0';
                         else
                             state <= s_FAST_CLK_8;
                         end if;
                         
                     when s_FAST_CLK_9  =>
-                        if (count < COUNT_MAX) then
+                        if (count < COUNT_MAX - 1) then
                             s_Rd_DV_mosi <= '0';
                             miso_start_flag <= '0';
+                        elsif (count = COUNT_MAX - 1) then
+                            s_Rd_DV_mosi <= '1';
+                            miso_start_flag <= '1';
                         elsif (count = COUNT_MAX) then
                             
                             state <= s_FAST_CLK_10;
-                            s_Rd_DV_mosi <= '1';
-                            miso_start_flag <= '1';
+                            s_Rd_DV_mosi <= '0';
+                            miso_start_flag <= '0';
                         else
                             state <= s_FAST_CLK_9;
                         end if;
                     
                     when s_FAST_CLK_10  =>
-                        if (count < COUNT_MAX) then
+                        if (count < COUNT_MAX - 1) then
                             s_Rd_DV_mosi <= '0';
                             miso_start_flag <= '0';
-                        elsif (count = COUNT_MAX) then
-                            
-                            state <= s_FAST_CLK_11;
+                        elsif (count = COUNT_MAX - 1) then
                             s_Rd_DV_mosi <= '1';
                             miso_start_flag <= '1';
+                        elsif (count = COUNT_MAX) then
+                            state <= s_FAST_CLK_11;
+                            s_Rd_DV_mosi <= '0';
+                            miso_start_flag <= '0';
                         else
                             state <= s_FAST_CLK_10;
                         end if;
                     
                     when s_FAST_CLK_11  =>
-                        if (count < COUNT_MAX) then
+                        if (count < COUNT_MAX - 1) then
                             s_Rd_DV_mosi <= '0';
                             miso_start_flag <= '0';
-                        elsif (count = COUNT_MAX) then
-                            
-                            state <= s_FAST_CLK_12;
+                        elsif (count = COUNT_MAX - 1) then
                             s_Rd_DV_mosi <= '1';
                             miso_start_flag <= '1';
+                        elsif (count = COUNT_MAX) then
+                            state <= s_FAST_CLK_12;
+                            s_Rd_DV_mosi <= '0';
+                            miso_start_flag <= '0';
                         else
                             state <= s_FAST_CLK_11;
                         end if;
                         
                     when s_FAST_CLK_12  =>
-                        if (count < COUNT_MAX) then
+                        if (count < COUNT_MAX - 1) then
                             s_Rd_DV_mosi <= '0';
                             miso_start_flag <= '0';
-                        elsif (count = COUNT_MAX) then
-                            
-                            state <= s_FAST_CLK_13;
+                        elsif (count = COUNT_MAX - 1) then
                             s_Rd_DV_mosi <= '1';
                             miso_start_flag <= '1';
+                        elsif (count = COUNT_MAX) then
+                            state <= s_FAST_CLK_13;
+                            s_Rd_DV_mosi <= '0';
+                            miso_start_flag <= '0';
                         else
                             state <= s_FAST_CLK_12;
                         end if;
                     
                     when s_FAST_CLK_13  =>
-                        if (count < COUNT_MAX) then
+                        if (count < COUNT_MAX - 1) then
                             s_Rd_DV_mosi <= '0';
                             miso_start_flag <= '0';
-                        elsif (count = COUNT_MAX) then
-                            
-                            state <= s_FAST_CLK_14;
+                        elsif (count = COUNT_MAX - 1) then
                             s_Rd_DV_mosi <= '1';
                             miso_start_flag <= '1';
+                        elsif (count = COUNT_MAX) then
+                            state <= s_FAST_CLK_14;
+                            s_Rd_DV_mosi <= '0';
+                            miso_start_flag <= '0';
                         else
                             state <= s_FAST_CLK_13;
                         end if;
                         
                     when s_FAST_CLK_14  =>
-                        if (count < COUNT_MAX) then
-                            s_Rd_DV_mosi <= '0';
-                            miso_start_flag <= '0';
-                        elsif (count = COUNT_MAX) then
-                            
+                    if (count < COUNT_MAX - 1) then
+                        s_Rd_DV_mosi <= '0';
+                        miso_start_flag <= '0';
+                    elsif (count = COUNT_MAX - 1) then
+                        s_Rd_DV_mosi <= '1';
+                        miso_start_flag <= '1';
+                    elsif (count = COUNT_MAX) then
                             state <= s_FAST_CLK_15;
                             s_Rd_DV_mosi <= '1';
                             miso_start_flag <= '1';
@@ -347,14 +391,16 @@ begin
                         end if;
                     
                     when s_FAST_CLK_15  =>
-                        if (count < COUNT_MAX) then
+                        if (count < COUNT_MAX - 1) then
                             s_Rd_DV_mosi <= '0';
                             miso_start_flag <= '0';
-                        elsif (count = COUNT_MAX) then
-                            
-                            state <= s_FAST_CLK_16;
+                        elsif (count = COUNT_MAX - 1) then
                             s_Rd_DV_mosi <= '1';
                             miso_start_flag <= '1';
+                        elsif (count = COUNT_MAX) then
+                            state <= s_FAST_CLK_16;
+                            s_Rd_DV_mosi <= '0';
+                            miso_start_flag <= '0';
                         else
                             state <= s_FAST_CLK_15;
                         end if;
@@ -377,7 +423,7 @@ begin
                         if (count = COUNT_MAX) then
                             state <= s_IDLE;
                             start_clk2 <= '0';
-                            --s_Wr_DV_mosi <= '0';
+                            s_Wr_DV_mosi <= '0';
                             s_Rd_DV_mosi <= '0';
                         else
                             state <= s_ONE_LAST_CYCLE;
@@ -385,7 +431,7 @@ begin
                     when others => 
                         state <= s_IDLE;
                         start_clk2 <= '0';
-                        --s_Wr_DV_mosi <= '0';
+                        s_Wr_DV_mosi <= '0';
                         s_Rd_DV_mosi <= '0';
                 end case;
             
@@ -406,171 +452,195 @@ begin
                         end if;
 
                     when s_GEN_ADJ_SIGNALS  =>
-                        if (count < COUNT_MAX) then
+                        if (count < COUNT_MAX - 1) then
                             s_Rd_DV_mosi <= '0';
+                        elsif count = COUNT_MAX - 1 then
+                            s_Rd_DV_mosi <= '1';
                         elsif (count = COUNT_MAX) then
                             state <= s_FAST_CLK_1;
-                            s_Rd_DV_mosi <= '1';
+                            s_Rd_DV_mosi <= '0';
                         else
                             state <= s_GEN_ADJ_SIGNALS;
                         end if;
                     
                     when s_FAST_CLK_1  =>
-                        if (count < COUNT_MAX) then
+                        if (count < COUNT_MAX - 1) then
                             s_Rd_DV_mosi <= '0';
+                        elsif count = COUNT_MAX - 1 then
+                            s_Rd_DV_mosi <= '1';
                         elsif (count = COUNT_MAX) then
                             state <= s_FAST_CLK_2;
-                            s_Rd_DV_mosi <= '1';
+                            s_Rd_DV_mosi <= '0';
                         else
                             state <= s_FAST_CLK_1;
                         end if;
 
                     when s_FAST_CLK_2  =>
-                        if (count < COUNT_MAX) then
+                        if (count < COUNT_MAX - 1) then
                             s_Rd_DV_mosi <= '0';
+                        elsif count = COUNT_MAX - 1 then
+                            s_Rd_DV_mosi <= '1';
                         elsif (count = COUNT_MAX) then
                             state <= s_FAST_CLK_3;
-                            s_Rd_DV_mosi <= '1';
+                            s_Rd_DV_mosi <= '0';
                         else
                             state <= s_FAST_CLK_2;
                         end if;
                     
                     when s_FAST_CLK_3  =>
-                        if (count < COUNT_MAX) then
+                        if (count < COUNT_MAX - 1) then
                             s_Rd_DV_mosi <= '0';
+                        elsif count = COUNT_MAX - 1 then
+                            s_Rd_DV_mosi <= '1';
                         elsif (count = COUNT_MAX) then
                             state <= s_FAST_CLK_4;
-                            s_Rd_DV_mosi <= '1';
+                            s_Rd_DV_mosi <= '0';
                         else
                             state <= s_FAST_CLK_3;
                         end if;
                     
                     when s_FAST_CLK_4  =>
-                        if (count < COUNT_MAX) then
+                        if (count < COUNT_MAX - 1) then
                             s_Rd_DV_mosi <= '0';
+                        elsif count = COUNT_MAX - 1 then
+                            s_Rd_DV_mosi <= '1';
                         elsif (count = COUNT_MAX) then
                             state <= s_FAST_CLK_5;
-                            s_Rd_DV_mosi <= '1';
+                            s_Rd_DV_mosi <= '0';
                         else
                             state <= s_FAST_CLK_4;
                         end if;
                     
                     when s_FAST_CLK_5  =>
-                        if (count < COUNT_MAX) then
+                        if (count < COUNT_MAX - 1) then
                             s_Rd_DV_mosi <= '0';
+                        elsif count = COUNT_MAX - 1 then
+                            s_Rd_DV_mosi <= '1';
                         elsif (count = COUNT_MAX) then
                             state <= s_FAST_CLK_6;
-                            s_Rd_DV_mosi <= '1';
+                            s_Rd_DV_mosi <= '0';
                         else
                             state <= s_FAST_CLK_5;
                         end if;
                     
                     when s_FAST_CLK_6  =>
-                        if (count < COUNT_MAX) then
+                        if (count < COUNT_MAX - 1) then
                             s_Rd_DV_mosi <= '0';
-                        elsif (count = COUNT_MAX) then
-                            
-                            state <= s_FAST_CLK_7;
+                        elsif count = COUNT_MAX - 1 then
                             s_Rd_DV_mosi <= '1';
+                        elsif (count = COUNT_MAX) then
+                            state <= s_FAST_CLK_7;
+                            s_Rd_DV_mosi <= '0';
                         else
                             state <= s_FAST_CLK_6;
                         end if;
                     
                     when s_FAST_CLK_7  =>
-                        if (count < COUNT_MAX) then
+                        if (count < COUNT_MAX - 1) then
                             s_Rd_DV_mosi <= '0';
-                        elsif (count = COUNT_MAX) then
-                            
-                            state <= s_FAST_CLK_8;
+                        elsif count = COUNT_MAX - 1 then
                             s_Rd_DV_mosi <= '1';
+                        elsif (count = COUNT_MAX) then
+                            state <= s_FAST_CLK_8;
+                            s_Rd_DV_mosi <= '0';
                         else
                             state <= s_FAST_CLK_7;
                         end if;
                     
                     when s_FAST_CLK_8  =>
-                        if (count < COUNT_MAX) then
+                        if (count < COUNT_MAX - 1) then
                             s_Rd_DV_mosi <= '0';
-                        elsif (count = COUNT_MAX) then
-                            
-                            state <= s_FAST_CLK_9;
+                        elsif count = COUNT_MAX - 1 then
                             s_Rd_DV_mosi <= '1';
+                        elsif (count = COUNT_MAX) then
+                            state <= s_FAST_CLK_9;
+                            s_Rd_DV_mosi <= '0';
                         else
                             state <= s_FAST_CLK_8;
                         end if;
                     
-                        when s_FAST_CLK_9  =>
-                        if (count < COUNT_MAX) then
+                    when s_FAST_CLK_9  =>
+                        if (count < COUNT_MAX - 1) then
                             s_Rd_DV_mosi <= '0';
-                        elsif (count = COUNT_MAX) then
-                            
-                            state <= s_FAST_CLK_10;
+                        elsif count = COUNT_MAX - 1 then
                             s_Rd_DV_mosi <= '1';
+                        elsif (count = COUNT_MAX) then
+                            state <= s_FAST_CLK_10;
+                            s_Rd_DV_mosi <= '0';
                         else
                             state <= s_FAST_CLK_9;
                         end if;
                     
                     when s_FAST_CLK_10  =>
-                        if (count < COUNT_MAX) then
+                        if (count < COUNT_MAX - 1) then
                             s_Rd_DV_mosi <= '0';
+                        elsif count = COUNT_MAX - 1 then
+                            s_Rd_DV_mosi <= '1';
                         elsif (count = COUNT_MAX) then
                             
                             state <= s_FAST_CLK_11;
-                            s_Rd_DV_mosi <= '1';
+                            s_Rd_DV_mosi <= '0';
                         else
                             state <= s_FAST_CLK_10;
                         end if;
                     
                     when s_FAST_CLK_11  =>
-                        if (count < COUNT_MAX) then
+                        if (count < COUNT_MAX - 1) then
                             s_Rd_DV_mosi <= '0';
-                        elsif (count = COUNT_MAX) then
-                            
-                            state <= s_FAST_CLK_12;
+                        elsif count = COUNT_MAX - 1 then
                             s_Rd_DV_mosi <= '1';
+                        elsif (count = COUNT_MAX) then
+                            state <= s_FAST_CLK_12;
+                            s_Rd_DV_mosi <= '0';
                         else
                             state <= s_FAST_CLK_11;
                         end if;
                         
                     when s_FAST_CLK_12  =>
-                        if (count < COUNT_MAX) then
+                        if (count < COUNT_MAX - 1) then
                             s_Rd_DV_mosi <= '0';
-                        elsif (count = COUNT_MAX) then
-                            
-                            state <= s_FAST_CLK_13;
+                        elsif count = COUNT_MAX - 1 then
                             s_Rd_DV_mosi <= '1';
+                        elsif (count = COUNT_MAX) then
+                            state <= s_FAST_CLK_13;
+                            s_Rd_DV_mosi <= '0';
                         else
                             state <= s_FAST_CLK_12;
                         end if;
                     
                     when s_FAST_CLK_13  =>
-                        if (count < COUNT_MAX) then
+                        if (count < COUNT_MAX - 1) then
                             s_Rd_DV_mosi <= '0';
+                        elsif count = COUNT_MAX - 1 then
+                            s_Rd_DV_mosi <= '1';
                         elsif (count = COUNT_MAX) then
                             
                             state <= s_FAST_CLK_14;
-                            s_Rd_DV_mosi <= '1';
+                            s_Rd_DV_mosi <= '0';
                         else
                             state <= s_FAST_CLK_13;
                         end if;
                         
                     when s_FAST_CLK_14  =>
-                        if (count < COUNT_MAX) then
+                        if (count < COUNT_MAX - 1) then
                             s_Rd_DV_mosi <= '0';
-                        elsif (count = COUNT_MAX) then
-                            
-                            state <= s_FAST_CLK_15;
+                        elsif count = COUNT_MAX - 1 then
                             s_Rd_DV_mosi <= '1';
+                        elsif (count = COUNT_MAX) then
+                            state <= s_FAST_CLK_15;
+                            s_Rd_DV_mosi <= '0';
                         else
                             state <= s_FAST_CLK_14;
                         end if;
                     
                     when s_FAST_CLK_15  =>
-                        if (count < COUNT_MAX) then
+                       if (count < COUNT_MAX - 1) then
                             s_Rd_DV_mosi <= '0';
-                        elsif (count = COUNT_MAX) then
-                            
-                            state <= s_FAST_CLK_16;
+                        elsif count = COUNT_MAX - 1 then
                             s_Rd_DV_mosi <= '1';
+                        elsif (count = COUNT_MAX) then
+                            state <= s_FAST_CLK_16;
+                            s_Rd_DV_mosi <= '0';
                         else
                             state <= s_FAST_CLK_15;
                         end if;
@@ -592,7 +662,7 @@ begin
                             
                             state <= s_IDLE;
                             start_clk2 <= '0';
-                            --s_Wr_DV_mosi <= '0';
+                            s_Wr_DV_mosi <= '0';
                             s_Rd_DV_mosi <= '0';
                         else
                             
@@ -602,7 +672,7 @@ begin
                         
                         state <= s_IDLE;
                         start_clk2 <= '0';
-                        --s_Wr_DV_mosi <= '0';
+                        s_Wr_DV_mosi <= '0';
                         s_Rd_DV_mosi <= '0';
                 end case;
             end if;
@@ -661,24 +731,15 @@ begin
             count <= count + 1;
         end if;
 
-        if count_wr_en_rst = '1' then
-            count_wr_en <= 0;
-        elsif  spi_clk = '1' and ss_n = '1' then
-            count_wr_en <= count_wr_en + 1;
+        if count_rst_wr_en = '1' then
+            count_for_wr_rn <= 0;
+        elsif count_spi_clk = 1 then
+            count_for_wr_rn <= count_for_wr_rn + 1;
+        else
+            count_for_wr_rn <= 0;
         end if;
     end if;
 
-end process;
-
-p_wr_en: process (clk)
-begin
-    if rising_edge(clk) then
-        if count_wr_en < 30 then
-            s_Wr_DV_mosi <= '0';
-        elsif count_wr_en = 31 then
-            s_Wr_DV_mosi <= '1';
-        end if;
-    end if;
 end process;
 
 process (clk)
@@ -726,7 +787,7 @@ end process;
 
 a_spi_clk <= clk2;
 s_mosi(0) <= mosi;
-s_miso(0) <= miso;
+s_miso(0) <= miso when (start_clk2 = '1') else '0';
 a_miso <= s_a_miso(0);
 a_mosi <= s_a_mosi(0) when (start_clk2 = '1') else '0';
 a_ss_n <= start_clk2;
@@ -734,6 +795,5 @@ a_ss_n <= start_clk2;
 s_Wr_En <= miso_start_flag;
 count_rst <= '1' when count = COUNT_MAX else '0';
 count_spi_clk_rst <= '1' when count_spi_clk = COUNT_SPI_MAX else '0';
-count_wr_en_rst <= '1' when count_wr_en = 31 else '0';
 
 end Behavioral;
