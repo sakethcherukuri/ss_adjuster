@@ -238,7 +238,7 @@ end process;
 process
 begin
     
-    wait for 5895 ns;
+    wait for 5915 ns;
     --D7 bit
     s_miso <= '1';
     wait for 40 ns;

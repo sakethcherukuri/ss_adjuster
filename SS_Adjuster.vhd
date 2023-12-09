@@ -73,7 +73,7 @@ signal state_miso : t_state_miso := s_IDLE_miso;
 -- Miso flags
 signal AF_Flag_miso, miso_start_flag : std_logic := '0';
 -- Signals for setting the Data valid lines on the FIFO
-signal s_Wr_DV_miso, s_Rd_DV_miso : std_logic := '0';
+signal s_Wr_DV_miso, s_Rd_DV_miso, miso_test : std_logic := '0';
 ------------------------- MISO ----------------------------
 
 -- Signals that count
@@ -117,7 +117,7 @@ MOSI_FIFO: entity xil_defaultlib.FIFO_ss
         o_Empty   =>  Empty_flag
     );
 
-MISO_FIFO: entity xil_defaultlib.FIFO_test
+MISO_FIFO: entity xil_defaultlib.FIFO_ss
     generic map (
         WIDTH => g_WIDTH,
         DEPTH => 8
@@ -150,6 +150,61 @@ begin
             s_Wr_DV_mosi <= '1';
         else
             s_Wr_DV_mosi <= '0';
+        end if;
+    end if;
+end process;
+
+gen_miso_wr_en: process(clk)
+begin
+    if falling_edge(clk) then
+        if cmd_write = '0' then
+            if (state = s_FAST_CLK_8  and count = 1) then
+                miso_start_flag <= '1';
+            elsif(count = 2) then
+                miso_start_flag <= '0';
+            end if;
+
+            if (state = s_FAST_CLK_9  and count = 1) then
+                miso_start_flag <= '1';
+            elsif(count = 2) then
+                miso_start_flag <= '0';
+            end if;
+
+            if (state = s_FAST_CLK_10  and count = 1) then
+                miso_start_flag <= '1';
+            elsif(count = 2) then
+                miso_start_flag <= '0';
+            end if;
+
+            if (state = s_FAST_CLK_11  and count = 1) then
+                miso_start_flag <= '1';
+            elsif(count = 2) then
+                miso_start_flag <= '0';
+            end if;
+
+            if (state = s_FAST_CLK_12  and count = 1) then
+                miso_start_flag <= '1';
+            elsif(count = 2) then
+                miso_start_flag <= '0';
+            end if;
+
+            if (state = s_FAST_CLK_13  and count = 1) then
+                miso_start_flag <= '1';
+            elsif(count = 2) then
+                miso_start_flag <= '0';
+            end if;
+
+            if (state = s_FAST_CLK_14  and count = 1) then
+                miso_start_flag <= '1';
+            elsif(count = 2) then
+                miso_start_flag <= '0';
+            end if;
+
+            if (state = s_FAST_CLK_15  and count = 1) then
+                miso_start_flag <= '1';
+            elsif(count = 2) then
+                miso_start_flag <= '0';
+            end if;
         end if;
     end if;
 end process;
@@ -282,19 +337,16 @@ begin
                         end if;
                     
                     when s_FAST_CLK_8  =>
-                        if (count = 0) then
+                        if (count < COUNT_MAX - 1) then
                             s_Rd_DV_mosi <= '0';
-                            miso_start_flag <= '1';
-                        elsif (count = 1) then
-                            s_Rd_DV_mosi <= '0';
-                            miso_start_flag <= '0';
-                        elsif (count = 2) then
+                            --miso_start_flag <= '0';
+                        elsif (count = COUNT_MAX - 1) then
                             s_Rd_DV_mosi <= '1';
-                            miso_start_flag <= '0';
+                            --miso_start_flag <= '1';
                         elsif (count = COUNT_MAX) then
                                 state <= s_FAST_CLK_9;
                                 s_Rd_DV_mosi <= '0';
-                                miso_start_flag <= '0';
+                                --miso_start_flag <= '0';
                         else
                             state <= s_FAST_CLK_8;
                         end if;
@@ -302,15 +354,15 @@ begin
                     when s_FAST_CLK_9  =>
                         if (count < COUNT_MAX - 1) then
                             s_Rd_DV_mosi <= '0';
-                            miso_start_flag <= '0';
+                            --miso_start_flag <= '0';
                         elsif (count = COUNT_MAX - 1) then
                             s_Rd_DV_mosi <= '1';
-                            miso_start_flag <= '1';
+                            --miso_start_flag <= '1';
                         elsif (count = COUNT_MAX) then
                             
                             state <= s_FAST_CLK_10;
                             s_Rd_DV_mosi <= '0';
-                            miso_start_flag <= '0';
+                            --miso_start_flag <= '0';
                         else
                             state <= s_FAST_CLK_9;
                         end if;
@@ -318,14 +370,14 @@ begin
                     when s_FAST_CLK_10  =>
                         if (count < COUNT_MAX - 1) then
                             s_Rd_DV_mosi <= '0';
-                            miso_start_flag <= '0';
+                            --miso_start_flag <= '0';
                         elsif (count = COUNT_MAX - 1) then
                             s_Rd_DV_mosi <= '1';
-                            miso_start_flag <= '1';
+                            --miso_start_flag <= '1';
                         elsif (count = COUNT_MAX) then
                             state <= s_FAST_CLK_11;
                             s_Rd_DV_mosi <= '0';
-                            miso_start_flag <= '0';
+                            --miso_start_flag <= '0';
                         else
                             state <= s_FAST_CLK_10;
                         end if;
@@ -333,14 +385,14 @@ begin
                     when s_FAST_CLK_11  =>
                         if (count < COUNT_MAX - 1) then
                             s_Rd_DV_mosi <= '0';
-                            miso_start_flag <= '0';
+                            --miso_start_flag <= '0';
                         elsif (count = COUNT_MAX - 1) then
                             s_Rd_DV_mosi <= '1';
-                            miso_start_flag <= '1';
+                            --miso_start_flag <= '1';
                         elsif (count = COUNT_MAX) then
                             state <= s_FAST_CLK_12;
                             s_Rd_DV_mosi <= '0';
-                            miso_start_flag <= '0';
+                            --miso_start_flag <= '0';
                         else
                             state <= s_FAST_CLK_11;
                         end if;
@@ -348,14 +400,14 @@ begin
                     when s_FAST_CLK_12  =>
                         if (count < COUNT_MAX - 1) then
                             s_Rd_DV_mosi <= '0';
-                            miso_start_flag <= '0';
+                            --miso_start_flag <= '0';
                         elsif (count = COUNT_MAX - 1) then
                             s_Rd_DV_mosi <= '1';
-                            miso_start_flag <= '1';
+                            --miso_start_flag <= '1';
                         elsif (count = COUNT_MAX) then
                             state <= s_FAST_CLK_13;
                             s_Rd_DV_mosi <= '0';
-                            miso_start_flag <= '0';
+                            --miso_start_flag <= '0';
                         else
                             state <= s_FAST_CLK_12;
                         end if;
@@ -363,14 +415,14 @@ begin
                     when s_FAST_CLK_13  =>
                         if (count < COUNT_MAX - 1) then
                             s_Rd_DV_mosi <= '0';
-                            miso_start_flag <= '0';
+                            --miso_start_flag <= '0';
                         elsif (count = COUNT_MAX - 1) then
                             s_Rd_DV_mosi <= '1';
-                            miso_start_flag <= '1';
+                            --miso_start_flag <= '1';
                         elsif (count = COUNT_MAX) then
                             state <= s_FAST_CLK_14;
                             s_Rd_DV_mosi <= '0';
-                            miso_start_flag <= '0';
+                            --miso_start_flag <= '0';
                         else
                             state <= s_FAST_CLK_13;
                         end if;
@@ -378,14 +430,14 @@ begin
                     when s_FAST_CLK_14  =>
                     if (count < COUNT_MAX - 1) then
                         s_Rd_DV_mosi <= '0';
-                        miso_start_flag <= '0';
+                        --miso_start_flag <= '0';
                     elsif (count = COUNT_MAX - 1) then
                         s_Rd_DV_mosi <= '1';
-                        miso_start_flag <= '1';
+                        --miso_start_flag <= '1';
                     elsif (count = COUNT_MAX) then
                             state <= s_FAST_CLK_15;
-                            s_Rd_DV_mosi <= '1';
-                            miso_start_flag <= '1';
+                            s_Rd_DV_mosi <= '0';
+                            --miso_start_flag <= '0';
                         else
                             state <= s_FAST_CLK_14;
                         end if;
@@ -393,14 +445,14 @@ begin
                     when s_FAST_CLK_15  =>
                         if (count < COUNT_MAX - 1) then
                             s_Rd_DV_mosi <= '0';
-                            miso_start_flag <= '0';
+                            --miso_start_flag <= '0';
                         elsif (count = COUNT_MAX - 1) then
                             s_Rd_DV_mosi <= '1';
-                            miso_start_flag <= '1';
+                            --miso_start_flag <= '1';
                         elsif (count = COUNT_MAX) then
                             state <= s_FAST_CLK_16;
                             s_Rd_DV_mosi <= '0';
-                            miso_start_flag <= '0';
+                            --miso_start_flag <= '0';
                         else
                             state <= s_FAST_CLK_15;
                         end if;
@@ -408,12 +460,12 @@ begin
                     when s_FAST_CLK_16  =>
                         if (count < COUNT_MAX) then
                             s_Rd_DV_mosi <= '0';
-                            miso_start_flag <= '0';
+                            --miso_start_flag <= '0';
                         elsif (count = COUNT_MAX) then
                             
                             state <= s_IDLE;
                             s_Rd_DV_mosi <= '0';
-                            miso_start_flag <= '0';
+                            --miso_start_flag <= '0';
                             start_clk2 <= '0';
                         else
                             state <= s_FAST_CLK_16;
